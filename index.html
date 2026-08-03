@@ -1,0 +1,951 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A field guide to the data pipeline: collection, storage, shaping, analysis and visualisation — where SQL sits, what NumPy is for, and what shape actually means.">
+<title>The Data Pipeline — A Field Guide from Collection to Clarity</title>
+<style>
+  :root {
+    --ink:#17201d; --paper:#f4f0e7; --panel:#fffdf7; --muted:#5d6863;
+    --green:#174f3f; --mint:#c9e2d5; --amber:#e6a33c; --coral:#cf6046;
+    --line:#cfc9bb; --soft:#e9e2d6; --shadow:0 20px 55px rgba(23,32,29,.11);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;color:var(--ink);background:var(--paper);font:17px/1.65 Georgia,'Times New Roman',serif}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.28;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E")}
+  a{color:var(--green);text-underline-offset:3px}
+  .shell{width:min(1400px,calc(100% - 56px));margin:auto;position:relative}
+  header{min-height:auto;display:grid;align-items:center;padding:34px 0 60px;border-bottom:1px solid var(--line);overflow:hidden}
+  .eyebrow,.label,nav,th,.mini-label{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;text-transform:uppercase;letter-spacing:.09em}
+  .eyebrow{color:var(--coral);font-size:.78rem;font-weight:700}
+  h1{font-size:clamp(3.2rem,8.6vw,8rem);line-height:.86;letter-spacing:-.075em;max-width:1000px;margin:20px 0 34px;font-weight:500}
+  h1 em{color:var(--green);font-weight:400}
+  .dek{max-width:800px;font-size:clamp(1.16rem,2.1vw,1.55rem);line-height:1.45}
+  .hero-note{margin-top:38px;max-width:900px;border-left:5px solid var(--amber);padding:12px 0 12px 22px;color:var(--muted)}
+  .hero-mark{position:absolute;right:250px;top:-10px;font:19rem/1 Georgia,serif;color:var(--mint);z-index:-1;transform:rotate(9deg)}
+  nav{position:sticky;top:0;z-index:10;background:rgba(244,240,231,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  nav .shell{display:flex;gap:20px;overflow-x:auto;padding-block:13px;scrollbar-width:none}
+  nav a{white-space:nowrap;text-decoration:none;font-size:.72rem;font-weight:700}
+  main section{padding:90px 0;border-bottom:1px solid var(--line)}
+  .section-head{display:grid;grid-template-columns:180px 1fr;gap:28px;margin-bottom:48px}
+  .section-no{font:700 .8rem/1 ui-monospace,monospace;color:var(--coral)}
+  h2{font-size:clamp(2.1rem,4.8vw,4.4rem);line-height:1;letter-spacing:-.045em;margin:0;font-weight:500}
+  h3{font-size:1.45rem;line-height:1.25;margin:0 0 12px}
+  p{margin:0 0 1em}
+  .lead{font-size:1.27rem;max-width:820px}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:20px}
+  .span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-5{grid-column:span 5}.span-6{grid-column:span 6}.span-7{grid-column:span 7}.span-8{grid-column:span 8}.span-12{grid-column:1/-1}
+  .card{background:var(--panel);border:1px solid var(--line);padding:26px;box-shadow:0 8px 0 rgba(23,79,63,.05)}
+  .card p:last-child,.card ul:last-child{margin-bottom:0}
+  .label,.mini-label{color:var(--coral);font-size:.68rem;font-weight:700}
+  .term{color:var(--green);font-weight:700}
+  .quote{background:var(--green);color:#f8f3e9;padding:48px;margin:60px auto 0;max-width:930px;font-size:clamp(1.4rem,3vw,2.35rem);line-height:1.25;box-shadow:var(--shadow)}
+  .quote small{display:block;margin-top:22px;font:.7rem/1.5 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--mint)}
+  .warning{border-left:6px solid var(--coral);background:#f6e2d9;padding:26px;margin:34px 0}
+  .annotation{border-left:5px solid var(--amber);background:#eee7d8;padding:22px 26px;margin:28px 0}
+  .figure{margin:38px 0;background:var(--panel);border:1px solid var(--line);padding:28px;overflow-x:auto}
+  .figure svg{display:block;width:100%;height:auto}
+  .figure.wide svg{min-width:900px}
+  .figure figcaption{margin-top:18px;color:var(--muted);font-size:.95rem;max-width:900px}
+  .figure .mini-label{display:block;margin-bottom:16px}
+  .scroll-hint{display:none;font:700 .7rem/1.4 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.07em;color:var(--coral);margin:10px 0}
+  table{width:100%;border-collapse:collapse;background:var(--panel);font-size:.95rem}
+  th,td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:16px}
+  th{font-size:.67rem;color:var(--green)}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86em;color:var(--green);font-weight:700}
+  pre{margin:0;padding:22px;background:#202b27;color:#f2ece2;overflow-x:auto;font:14px/1.75 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  pre .c{color:#8ba79b}
+  pre .k{color:#ffc470}
+  .code-pair{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:30px 0}
+  .code-pair > div{border:1px solid var(--line);background:var(--panel)}
+  .code-pair .cap{padding:16px 20px 12px;border-bottom:1px solid var(--line)}
+  .code-pair .cap strong{display:block;font-size:1.05rem;margin-top:4px}
+  .cycle{counter-reset:step;display:grid;gap:12px}
+  .step{counter-increment:step;display:grid;grid-template-columns:70px 230px 1fr;gap:22px;align-items:start;padding:24px;border-top:1px solid var(--line);background:linear-gradient(90deg,rgba(255,253,247,.9),transparent)}
+  .step::before{content:counter(step,decimal-leading-zero);font:700 1.8rem/1 ui-monospace,monospace;color:var(--coral)}
+  .step h3{font-size:1.15rem}
+  .step p{margin:0}
+  .step strong{color:var(--green)}
+  .modern{background:var(--ink);color:#f7f1e7}
+  .modern h2{color:#fffaf0}.modern .section-no,.modern .label{color:#ff987f}.modern .lead{color:#ced9d4}
+  .modern .card{background:var(--panel);color:var(--ink);border-color:#675f57}
+  .modern .figure{background:#202b27;border-color:#56635e}
+  .modern .figure figcaption{color:#b9c6c0}
+  .modern .warning{color:var(--ink)}
+  .strength{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:26px}
+  .strength>div{padding:24px;border-top:8px solid;background:var(--panel)}
+  .strength .a{border-color:var(--coral)}.strength .b{border-color:var(--amber)}.strength .c{border-color:var(--green)}.strength .d{border-color:#6f8fa6}
+  .canvas{background:var(--panel);border:1px solid var(--line);padding:35px}
+  .canvas ol{counter-reset:prompt;list-style:none;padding:0;margin:0}
+  .canvas li{counter-increment:prompt;position:relative;padding:15px 0 15px 44px;border-bottom:1px dotted var(--line)}
+  .canvas li:last-child{border-bottom:none}
+  .canvas li::before{content:counter(prompt);position:absolute;left:0;top:15px;color:var(--coral);font:700 1rem/1.7 ui-monospace,monospace}
+  .brand-top,.tidy{display:inline-flex;flex-direction:column;align-items:center;gap:9px;text-decoration:none;color:var(--muted);font:700 1.02rem/1.1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.11em;text-transform:uppercase}
+  .brand-top{margin-bottom:30px}
+  .brand-top:hover,.tidy:hover{color:var(--green)}
+  .brand-top img,.tidy img{width:84px;height:84px;object-fit:contain;display:block}
+  footer{padding:60px 0 90px;color:var(--muted)}
+  .footer-grid{display:grid;grid-template-columns:auto 1fr;gap:34px;align-items:center}
+  @media (max-width:700px){.footer-grid{grid-template-columns:1fr;justify-items:start}}
+  @media (max-width:900px){
+    .section-head{grid-template-columns:1fr;gap:10px}
+    .grid{grid-template-columns:1fr}
+    [class*="span-"]{grid-column:auto}
+    .code-pair{grid-template-columns:1fr}
+    .step{grid-template-columns:52px 1fr;gap:14px}
+    .step p{grid-column:1/-1}
+    .strength{grid-template-columns:1fr}
+    .scroll-hint{display:block}
+    .quote{padding:30px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="shell">
+    <div class="hero-mark" aria-hidden="true">&#8721;</div>
+    <a class="brand-top" href="https://github.com/TidyWeb/" target="_blank" rel="noopener"><img src="assets/tidyweb_logo.png" alt="TidyWeb logo" width="84" height="84"><span>TidyWeb</span></a>
+    <div class="eyebrow">Analytical Field Guide &middot; raw record to visible truth</div>
+    <h1>The Data<br><em>Pipeline</em></h1>
+    <p class="dek">How a fact about the world becomes a row, how a row becomes a shape, and how a shape becomes a picture that shows you something the numbers were hiding.</p>
+    <p class="hero-note"><strong>The governing question:</strong> at any moment, which of the five stages am I standing in — and therefore which tool is the problem actually asking for?</p>
+  </div>
+</header>
+
+<nav aria-label="Document sections"><div class="shell">
+  <a href="#stages">Five stages</a><a href="#collection">Collection</a><a href="#storage">Storage &amp; SQL</a><a href="#shaping">Shaping</a><a href="#shape">What shape means</a><a href="#numpy">Why NumPy</a><a href="#family">The family</a><a href="#viz">Visualisation</a><a href="#canvas">Orientation canvas</a>
+</div></nav>
+
+<main>
+
+<section id="stages"><div class="shell">
+  <div class="section-head"><div class="section-no">01 / THE SPINE</div><div><h2>Five stages, five different jobs</h2><p class="lead">Every piece of data analysis you will ever do walks the same route. The stages are genuinely different work, done with different tools, and most confusion about “which library do I use” dissolves the moment you know which stage you are standing in.</p></div></div>
+
+  <p class="scroll-hint">Scroll sideways to follow the whole route &rarr;</p>
+  <figure class="figure wide">
+    <span class="mini-label">Figure 01 &middot; The route, and what changes at each stop</span>
+    <svg viewBox="0 0 1120 330" role="img" aria-labelledby="spine-t spine-d">
+      <title id="spine-t">The five stages of the data pipeline</title>
+      <desc id="spine-d">Collection turns an event into a record. Storage holds records at scale. Shaping reduces them to an extract. Analysis produces an answer. Visualisation turns the answer into a picture. Volume falls sharply along the route while meaning rises.</desc>
+      <defs>
+        <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#174f3f"/></marker>
+        <style>
+          .box{fill:#fffdf7;stroke:#174f3f;stroke-width:3}
+          .boxg{fill:#174f3f;stroke:#174f3f;stroke-width:3}
+          .num{font:700 13px ui-monospace,monospace;fill:#cf6046;letter-spacing:.08em}
+          .ti{font:700 19px Georgia,serif;fill:#17201d}
+          .tiw{font:700 19px Georgia,serif;fill:#fffdf7}
+          .su{font:14px Georgia,serif;fill:#5d6863}
+          .suw{font:14px Georgia,serif;fill:#c9e2d5}
+          .ln{stroke:#174f3f;stroke-width:4;fill:none;marker-end:url(#ar)}
+          .ax{font:700 12px ui-monospace,monospace;fill:#5d6863;letter-spacing:.08em}
+        </style>
+      </defs>
+
+      <path class="ln" d="M198 118 L232 118"/><path class="ln" d="M398 118 L432 118"/>
+      <path class="ln" d="M598 118 L632 118"/><path class="ln" d="M798 118 L832 118"/>
+
+      <rect class="box" x="10" y="48" width="185" height="140" rx="8"/>
+      <text class="num" x="30" y="78">STAGE 01</text><text class="ti" x="30" y="106">Collection</text>
+      <text class="su" x="30" y="132">An event in the</text><text class="su" x="30" y="152">world becomes</text><text class="su" x="30" y="172">a written record.</text>
+
+      <rect class="box" x="210" y="48" width="185" height="140" rx="8"/>
+      <text class="num" x="230" y="78">STAGE 02</text><text class="ti" x="230" y="106">Storage</text>
+      <text class="su" x="230" y="132">Records sit and</text><text class="su" x="230" y="152">wait, usually in</text><text class="su" x="230" y="172">a database.</text>
+
+      <rect class="box" x="410" y="48" width="185" height="140" rx="8"/>
+      <text class="num" x="430" y="78">STAGE 03</text><text class="ti" x="430" y="106">Shaping</text>
+      <text class="su" x="430" y="132">Fetch the part</text><text class="su" x="430" y="152">you want, laid</text><text class="su" x="430" y="172">out how you want.</text>
+
+      <rect class="box" x="610" y="48" width="185" height="140" rx="8"/>
+      <text class="num" x="630" y="78">STAGE 04</text><text class="ti" x="630" y="106">Analysis</text>
+      <text class="su" x="630" y="132">Ask a question</text><text class="su" x="630" y="152">and get back</text><text class="su" x="630" y="172">an answer.</text>
+
+      <rect class="boxg" x="810" y="48" width="185" height="140" rx="8"/>
+      <text class="num" x="830" y="78" fill="#e6a33c">STAGE 05</text><text class="tiw" x="830" y="106">Visualisation</text>
+      <text class="suw" x="830" y="132">The answer</text><text class="suw" x="830" y="152">becomes visible</text><text class="suw" x="830" y="172">to a human eye.</text>
+
+      <path d="M10 240 L995 240" stroke="#cfc9bb" stroke-width="2"/>
+      <path d="M10 262 C300 262 700 300 995 302" stroke="#cf6046" stroke-width="4" fill="none"/>
+      <text class="ax" x="10" y="230">VOLUME</text>
+      <text class="ax" x="900" y="230">MEANING</text>
+      <path d="M10 300 C300 300 700 262 995 260" stroke="#174f3f" stroke-width="4" fill="none"/>
+      <text class="su" x="10" y="325">Rows fall away as you travel right. Understanding rises to meet them.</text>
+    </svg>
+    <figcaption>Nothing on this route is optional and nothing can be done out of order. What varies is <em>who</em> does each stage. On a real job, somebody may have finished stages one and two years before you arrived.</figcaption>
+  </figure>
+
+  <div class="grid">
+    <article class="card span-4"><span class="label">The common trap</span><h3>Reaching for the wrong stage</h3><p>“My chart looks wrong” is almost never a charting problem. It is usually a shaping problem wearing a chart’s clothes. Walk back up the pipeline until you find the stage where the truth changed.</p></article>
+    <article class="card span-4"><span class="label">The inherited stage</span><h3>Someone else’s decisions</h3><p>You will normally arrive at stage three. Stages one and two were settled by people who were not thinking about your question. Their choices set a hard ceiling on what you can find.</p></article>
+    <article class="card span-4"><span class="label">The direction of travel</span><h3>Narrowing, always</h3><p>Four hundred million rows become thirteen. Thirteen become one sentence. One sentence becomes one picture. Every stage throws material away — deliberately.</p></article>
+  </div>
+</div></section>
+
+<section id="collection"><div class="shell">
+  <div class="section-head"><div class="section-no">02 / COLLECTION</div><div><h2>The only stage you can never repair</h2><p class="lead">A till scan. A form submission. A sensor reporting. A line written into a server log because someone loaded a page. This is where data quality is decided, and no amount of clever Python later will undo a decision made here.</p></div></div>
+
+  <div class="grid">
+    <article class="card span-6"><span class="label">Is it trustworthy?</span><h3>Quality</h3><p>Accurate, complete, consistent — and does it actually measure the thing it claims to measure?</p><p>If the form offered a free-text box for “county”, you will receive <span class="term">Derbyshire</span>, <span class="term">derbyshire</span>, <span class="term">Derbys</span>, <span class="term">DBY</span> and <span class="term">N/A</span> forever. You can standardise the spellings. You cannot recover what the person meant by N/A.</p></article>
+    <article class="card span-6"><span class="label">How fine-grained is it?</span><h3>Richness</h3><p>Also called granularity or resolution. One row saying <em>March sales: £40,000</em> is poor. A row per transaction carrying a timestamp, item, branch and payment method is rich.</p><p>If the sensor samples once an hour, the minutes are gone. They were never written down, and nothing downstream can invent them.</p></article>
+  </div>
+
+  <figure class="figure">
+    <span class="mini-label">Figure 02 &middot; Aggregation is a one-way street</span>
+    <svg viewBox="0 0 1000 300" role="img" aria-labelledby="agg-t agg-d">
+      <title id="agg-t">Aggregation flows one way only</title>
+      <desc id="agg-d">Four detailed transaction rows collapse into a single monthly total. The reverse arrow, from total back to rows, is crossed out because the detail cannot be recovered.</desc>
+      <defs>
+        <marker id="ar2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#174f3f"/></marker>
+        <style>
+          .row{fill:#fffdf7;stroke:#174f3f;stroke-width:2.5}
+          .tot{fill:#174f3f;stroke:#174f3f;stroke-width:3}
+          .rl{font:14px ui-monospace,monospace;fill:#17201d}
+          .tw{font:700 22px Georgia,serif;fill:#fffdf7}
+          .cap2{font:700 12px ui-monospace,monospace;fill:#cf6046;letter-spacing:.08em}
+          .note{font:15px Georgia,serif;fill:#5d6863}
+          .go{stroke:#174f3f;stroke-width:5;fill:none;marker-end:url(#ar2)}
+          .no{stroke:#cf6046;stroke-width:4;fill:none;stroke-dasharray:11 8}
+        </style>
+      </defs>
+
+      <text class="cap2" x="20" y="28">RICH &middot; ONE ROW PER TRANSACTION</text>
+      <rect class="row" x="20" y="42" width="330" height="36" rx="5"/><text class="rl" x="36" y="66">02 Mar 09:14 · Long Eaton · tea · £2.40</text>
+      <rect class="row" x="20" y="86" width="330" height="36" rx="5"/><text class="rl" x="36" y="110">02 Mar 11:52 · Derby · beans ×2 · £5.10</text>
+      <rect class="row" x="20" y="130" width="330" height="36" rx="5"/><text class="rl" x="36" y="154">07 Mar 16:31 · Long Eaton · bread · £1.80</text>
+      <rect class="row" x="20" y="174" width="330" height="36" rx="5"/><text class="rl" x="36" y="198">19 Mar 08:02 · Nottingham · milk · £1.15</text>
+      <text class="note" x="20" y="240">Any question is still open: by branch, by hour,</text>
+      <text class="note" x="20" y="262">by item, by weekday, by anything recorded.</text>
+
+      <path class="go" d="M370 110 L560 110"/>
+      <text class="cap2" x="398" y="96">SUM</text>
+
+      <rect class="tot" x="580" y="60" width="330" height="100" rx="6"/>
+      <text class="tw" x="606" y="100">March sales</text><text class="tw" x="606" y="134">£40,000</text>
+      <text class="cap2" x="580" y="46">COARSE &middot; ONE ROW PER MONTH</text>
+
+      <path class="no" d="M560 200 L370 200"/>
+      <path d="M448 178 L482 222 M482 178 L448 222" stroke="#cf6046" stroke-width="6"/>
+      <text class="note" x="580" y="196">Every question is now closed. Which branch?</text>
+      <text class="note" x="580" y="218">Which day? Which item? Gone, permanently.</text>
+      <text class="note" x="580" y="256" fill="#cf6046">No operation recovers four hundred transactions</text>
+      <text class="note" x="580" y="278" fill="#cf6046">from a single total.</text>
+    </svg>
+    <figcaption>Fine to coarse, always. Coarse to fine, never. This is probably the single most useful idea in the whole pipeline — and it is decided at collection time, by someone who may never meet you.</figcaption>
+  </figure>
+
+  <div class="warning"><strong>The practical consequence:</strong> when you are ever in a position to influence collection, argue for the finest grain you can afford to store. You are not deciding what today’s question needs. You are deciding what every future question will be permitted to ask.</div>
+
+  <div class="annotation"><strong>And it is worse than merely lossy.</strong> Collapsing detail does not only remove information &mdash; under the right conditions it can <em>reverse the conclusion</em>, so that a trend visible in every subgroup runs the opposite way once the subgroups are pooled. That effect has a name, Simpson’s paradox, and it is examined properly in <a href="#viz">section 08</a>. Hold the thought until then; for now, note only that grain is not a matter of resolution alone. It can decide which answer you get.</div>
+</div></section>
+
+<section id="storage"><div class="shell">
+  <div class="section-head"><div class="section-no">03 / STORAGE</div><div><h2>Where SQL actually lives</h2><p class="lead">The records have to sit somewhere, and overwhelmingly that somewhere is a database. The conceptual point is one of scale: a database holds vastly more than you want, and it is not going to fit on your laptop.</p></div></div>
+
+  <figure class="figure">
+    <span class="mini-label">Figure 03 &middot; Why the shaping happens over there, not over here</span>
+    <svg viewBox="0 0 1000 300" role="img" aria-labelledby="db-t db-d">
+      <title id="db-t">SQL reduces at source before the data travels</title>
+      <desc id="db-d">A database holding four hundred million rows receives a short SQL instruction, does the sifting on its own hardware, and returns thirteen rows to the analyst's laptop.</desc>
+      <defs>
+        <marker id="ar3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#174f3f"/></marker>
+        <marker id="ar4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#cf6046"/></marker>
+        <style>
+          .db{fill:#174f3f;stroke:#174f3f}
+          .lap{fill:#fffdf7;stroke:#174f3f;stroke-width:3}
+          .lb{font:700 12px ui-monospace,monospace;fill:#cf6046;letter-spacing:.08em}
+          .bigw{font:700 26px Georgia,serif;fill:#fffdf7}
+          .smw{font:14px Georgia,serif;fill:#c9e2d5}
+          .big{font:700 26px Georgia,serif;fill:#174f3f}
+          .sm{font:14px Georgia,serif;fill:#5d6863}
+          .q{font:14px ui-monospace,monospace;fill:#17201d}
+          .out{stroke:#174f3f;stroke-width:4;fill:none;marker-end:url(#ar3)}
+          .back{stroke:#cf6046;stroke-width:4;fill:none;marker-end:url(#ar4)}
+        </style>
+      </defs>
+
+      <ellipse class="db" cx="140" cy="70" rx="115" ry="26"/>
+      <path class="db" d="M25 70 L25 200 A115 26 0 0 0 255 200 L255 70"/>
+      <ellipse cx="140" cy="70" rx="115" ry="26" fill="#205e4c"/>
+      <text class="bigw" x="66" y="140">400,000,000</text>
+      <text class="smw" x="92" y="168">rows in storage</text>
+      <text class="lb" x="42" y="252">THE DATABASE &middot; ON A SERIOUS MACHINE</text>
+
+      <path class="back" d="M700 88 L290 88"/>
+      <rect x="330" y="34" width="330" height="38" rx="5" fill="#eee7d8" stroke="#e6a33c" stroke-width="2"/>
+      <text class="q" x="346" y="59">SELECT week, SUM(total) ... WHERE branch=…</text>
+      <text class="lb" x="330" y="24">1 · A SHORT INSTRUCTION TRAVELS OUT</text>
+
+      <path class="out" d="M290 168 L700 168"/>
+      <text class="lb" x="332" y="152">2 · THE ENGINE SIFTS, AND SENDS BACK</text>
+      <text class="sm" x="332" y="196">Thirteen rows. Small enough to hold in memory,</text>
+      <text class="sm" x="332" y="218">think about, and hand to pandas.</text>
+
+      <rect class="lap" x="720" y="60" width="255" height="130" rx="8"/>
+      <text class="big" x="800" y="112">13 rows</text>
+      <text class="sm" x="760" y="142">your laptop, quite happy</text>
+      <text class="lb" x="720" y="212">YOUR MACHINE</text>
+    </svg>
+    <figcaption>You do not drag four hundred million rows across a network and then filter them in Python. Your laptop does not have the memory, and you would be waiting until Thursday.</figcaption>
+  </figure>
+
+  <div class="annotation"><strong>So whoever told you SQL is vital for data analysis was right — and your course is not wrong to leave it out.</strong> It is teaching the other half. A course that runs CSV &rarr; pandas &rarr; chart is a real, complete, working pipeline. It is simply the version where somebody else already ran the SQL and handed you the extract.</div>
+</div></section>
+
+<section id="shaping"><div class="shell">
+  <div class="section-head"><div class="section-no">04 / SHAPING</div><div><h2>The same thought, said in two places</h2><p class="lead">Shaping means filtering, sorting, joining tables together and summarising. The thing that confuses learners is that it happens twice, in two languages, doing largely the same work — because it happens on two sides of a network cable.</p></div></div>
+
+  <div class="grid">
+    <article class="card span-6"><span class="label">Shaping at source</span><h3>SQL</h3><p>Runs inside the database, before the data reaches you. Its job is to reduce an enormous store down to a manageable extract.</p><p>Filtering, joining, grouping, summarising — across volumes far too large to hold in memory.</p></article>
+    <article class="card span-6"><span class="label">Shaping in memory</span><h3>pandas</h3><p>Runs on your machine, after the extract has arrived. Its job is the detailed, exploratory, iterative work on something that fits in RAM.</p><p>Filtering, joining, grouping, summarising — plus cleaning, reshaping, and everything that feeds a chart.</p></article>
+  </div>
+
+  <div class="code-pair">
+    <div>
+      <div class="cap"><span class="mini-label">Over there, in the database</span><strong>SQL</strong></div>
+<pre><span class="k">WHERE</span> branch = 'Nottingham'</pre>
+    </div>
+    <div>
+      <div class="cap"><span class="mini-label">Over here, in memory</span><strong>pandas</strong></div>
+<pre>df[df[<span class="k">"branch"</span>] == <span class="k">"Nottingham"</span>]</pre>
+    </div>
+  </div>
+
+  <p>That overlap is good news, because it means the <em>concepts</em> transfer completely and only the syntax differs. Both are saying: keep the rows where this is true, drop the rows where it is false. You already know that idea from writing a loop with an <span class="mono">if</span> inside it — the two lines above are that same loop-plus-<span class="mono">if</span>, written as shorthand by people who got tired of typing it out.</p>
+
+  <div class="quote">Learn SQL after, not instead. Because you will already own the concepts, you will pick up the syntax in a fortnight.<small>On the gap in the syllabus</small></div>
+</div></section>
+
+<section id="shape"><div class="shell">
+  <div class="section-head"><div class="section-no">05 / SHAPE</div><div><h2>Shape is just a tuple of sizes</h2><p class="lead">This is the idea that unlocks NumPy, and it is far smaller than the word makes it sound. Shape means: how many dimensions the data has, and how big each dimension is. Nothing more.</p></div></div>
+
+  <p class="scroll-hint">Scroll sideways to climb the whole ladder &rarr;</p>
+  <figure class="figure wide">
+    <span class="mini-label">Figure 04 &middot; The dimension ladder</span>
+    <svg viewBox="0 0 1080 340" role="img" aria-labelledby="sh-t sh-d">
+      <title id="sh-t">Zero, one, two and three dimensional arrays</title>
+      <desc id="sh-d">A scalar is a single cell. A vector of shape seven is a row of seven cells. A matrix of shape five by seven is a grid. A three dimensional array of shape ten by five by seven is a stack of those grids.</desc>
+      <style>
+        .cell{fill:#c9e2d5;stroke:#174f3f;stroke-width:1.6}
+        .cellb{fill:#fffdf7;stroke:#174f3f;stroke-width:1.6}
+        .tag{font:700 20px ui-monospace,monospace;fill:#cf6046}
+        .nm{font:700 17px Georgia,serif;fill:#17201d}
+        .ds{font:14px Georgia,serif;fill:#5d6863}
+        .ax2{font:700 11px ui-monospace,monospace;fill:#174f3f;letter-spacing:.06em}
+      </style>
+
+      <text class="tag" x="20" y="34">42</text>
+      <text class="nm" x="20" y="60">Scalar</text>
+      <rect class="cell" x="20" y="76" width="30" height="30"/>
+      <text class="ds" x="20" y="132">No dimensions.</text>
+      <text class="ds" x="20" y="152">Nothing to count</text>
+      <text class="ds" x="20" y="172">along.</text>
+
+      <text class="tag" x="200" y="34">(7,)</text>
+      <text class="nm" x="200" y="60">Vector</text>
+      <g>
+        <rect class="cell" x="200" y="76" width="30" height="30"/><rect class="cell" x="234" y="76" width="30" height="30"/>
+        <rect class="cell" x="268" y="76" width="30" height="30"/><rect class="cell" x="302" y="76" width="30" height="30"/>
+        <rect class="cell" x="336" y="76" width="30" height="30"/><rect class="cell" x="370" y="76" width="30" height="30"/>
+        <rect class="cell" x="404" y="76" width="30" height="30"/>
+      </g>
+      <path d="M200 118 L434 118" stroke="#cf6046" stroke-width="2"/>
+      <text class="ax2" x="272" y="136">7 ALONG</text>
+      <text class="ds" x="200" y="164">Daily temperatures</text>
+      <text class="ds" x="200" y="184">for one week.</text>
+
+      <text class="tag" x="530" y="34">(5, 7)</text>
+      <text class="nm" x="530" y="60">Matrix</text>
+      <g id="gridcells">
+        <rect class="cellb" x="530" y="76" width="26" height="24"/><rect class="cellb" x="560" y="76" width="26" height="24"/><rect class="cellb" x="590" y="76" width="26" height="24"/><rect class="cellb" x="620" y="76" width="26" height="24"/><rect class="cellb" x="650" y="76" width="26" height="24"/><rect class="cellb" x="680" y="76" width="26" height="24"/><rect class="cellb" x="710" y="76" width="26" height="24"/>
+        <rect class="cellb" x="530" y="104" width="26" height="24"/><rect class="cellb" x="560" y="104" width="26" height="24"/><rect class="cellb" x="590" y="104" width="26" height="24"/><rect class="cellb" x="620" y="104" width="26" height="24"/><rect class="cellb" x="650" y="104" width="26" height="24"/><rect class="cellb" x="680" y="104" width="26" height="24"/><rect class="cellb" x="710" y="104" width="26" height="24"/>
+        <rect class="cellb" x="530" y="132" width="26" height="24"/><rect class="cellb" x="560" y="132" width="26" height="24"/><rect class="cellb" x="590" y="132" width="26" height="24"/><rect class="cellb" x="620" y="132" width="26" height="24"/><rect class="cellb" x="650" y="132" width="26" height="24"/><rect class="cellb" x="680" y="132" width="26" height="24"/><rect class="cellb" x="710" y="132" width="26" height="24"/>
+        <rect class="cellb" x="530" y="160" width="26" height="24"/><rect class="cellb" x="560" y="160" width="26" height="24"/><rect class="cellb" x="590" y="160" width="26" height="24"/><rect class="cellb" x="620" y="160" width="26" height="24"/><rect class="cellb" x="650" y="160" width="26" height="24"/><rect class="cellb" x="680" y="160" width="26" height="24"/><rect class="cellb" x="710" y="160" width="26" height="24"/>
+        <rect class="cellb" x="530" y="188" width="26" height="24"/><rect class="cellb" x="560" y="188" width="26" height="24"/><rect class="cellb" x="590" y="188" width="26" height="24"/><rect class="cellb" x="620" y="188" width="26" height="24"/><rect class="cellb" x="650" y="188" width="26" height="24"/><rect class="cellb" x="680" y="188" width="26" height="24"/><rect class="cellb" x="710" y="188" width="26" height="24"/>
+      </g>
+      <path d="M518 76 L518 212" stroke="#cf6046" stroke-width="2"/>
+      <text class="ax2" x="452" y="148">5 ROWS</text>
+      <path d="M530 224 L736 224" stroke="#cf6046" stroke-width="2"/>
+      <text class="ax2" x="588" y="242">7 COLUMNS</text>
+      <text class="ds" x="530" y="272">Seven days across</text>
+      <text class="ds" x="530" y="292">five cities.</text>
+
+      <text class="tag" x="820" y="34">(10, 5, 7)</text>
+      <text class="nm" x="820" y="60">Stack</text>
+      <g>
+        <rect class="cellb" x="880" y="76" width="150" height="110" rx="4"/>
+        <rect class="cellb" x="868" y="88" width="150" height="110" rx="4"/>
+        <rect class="cellb" x="856" y="100" width="150" height="110" rx="4"/>
+        <rect class="cell" x="844" y="112" width="150" height="110" rx="4"/>
+        <text class="ax2" x="884" y="172">5 × 7 GRID</text>
+      </g>
+      <path d="M820 240 L1000 240" stroke="#cf6046" stroke-width="2"/>
+      <text class="ax2" x="864" y="258">10 OF THEM</text>
+      <text class="ds" x="820" y="290">One grid per year,</text>
+      <text class="ds" x="820" y="310">ten years deep.</text>
+    </svg>
+    <figcaption>Read the tuple outermost first. <span class="mono">(10, 5, 7)</span> means ten boxes, each holding five boxes, each holding seven numbers. It is your boxes-within-boxes model with the sizes written down.</figcaption>
+  </figure>
+
+  <div class="grid">
+    <article class="card span-6"><span class="label">What the error is telling you</span><h3>“Shapes not aligned”</h3><p>When NumPy shouts about shapes, it is saying something mundane: you have asked it to line a 5×7 grid up against a 3×9 grid, and there is no sensible way to do that. Read the two shapes in the message and compare them position by position.</p></article>
+    <article class="card span-6"><span class="label">What makes it an array</span><h3>The rule on top</h3><p>An array is a nested list with one extra rule imposed: <span class="term">every box at the same level must be the same size, and everything inside must be the same type.</span> No row of six beside a row of nine. No string hiding among the numbers.</p></article>
+  </div>
+</div></section>
+
+<section id="numpy" class="modern"><div class="shell">
+  <div class="section-head"><div class="section-no">06 / THE ENGINE</div><div><h2>Why NumPy gave up flexibility</h2><p class="lead">The rigidity looks like a restriction. It is actually the entire reason NumPy is worth having — and the reason is about memory, not about mathematics.</p></div></div>
+
+  <figure class="figure wide">
+    <span class="mini-label">Figure 05 &middot; Where the values actually sit</span>
+    <svg viewBox="0 0 1080 360" role="img" aria-labelledby="mem-t mem-d">
+      <title id="mem-t">Python list versus NumPy array in memory</title>
+      <desc id="mem-d">A Python list holds pointers scattered to values elsewhere in memory, each carrying a type tag. A NumPy array holds the values themselves nose to tail in one unbroken block.</desc>
+      <defs>
+        <marker id="ar5" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff987f"/></marker>
+        <style>
+          .slot{fill:#2c3a35;stroke:#8ba79b;stroke-width:2}
+          .val{fill:#fffdf7;stroke:#c9e2d5;stroke-width:2}
+          .blk{fill:#c9e2d5;stroke:#174f3f;stroke-width:2}
+          .hl{font:700 12px ui-monospace,monospace;fill:#ff987f;letter-spacing:.08em}
+          .hw{font:700 18px Georgia,serif;fill:#fffaf0}
+          .dw{font:14px Georgia,serif;fill:#b9c6c0}
+          .vt{font:700 14px ui-monospace,monospace;fill:#17201d}
+          .pt{font:12px ui-monospace,monospace;fill:#8ba79b}
+          .pl{stroke:#ff987f;stroke-width:2;fill:none;marker-end:url(#ar5)}
+        </style>
+      </defs>
+
+      <text class="hl" x="20" y="26">PYTHON LIST &middot; FLEXIBLE, AND PAYING FOR IT</text>
+      <text class="hw" x="20" y="52">Each slot holds a pointer, not a value</text>
+      <rect class="slot" x="20" y="70" width="70" height="42" rx="4"/><text class="pt" x="34" y="96">ptr →</text>
+      <rect class="slot" x="96" y="70" width="70" height="42" rx="4"/><text class="pt" x="110" y="96">ptr →</text>
+      <rect class="slot" x="172" y="70" width="70" height="42" rx="4"/><text class="pt" x="186" y="96">ptr →</text>
+      <rect class="slot" x="248" y="70" width="70" height="42" rx="4"/><text class="pt" x="262" y="96">ptr →</text>
+      <rect class="slot" x="324" y="70" width="70" height="42" rx="4"/><text class="pt" x="338" y="96">ptr →</text>
+
+      <path class="pl" d="M55 116 C70 160 300 150 336 186"/>
+      <path class="pl" d="M131 116 C140 150 60 170 78 186"/>
+      <path class="pl" d="M207 116 C215 155 470 160 486 186"/>
+      <path class="pl" d="M283 116 C290 155 190 165 208 186"/>
+      <path class="pl" d="M359 116 C370 160 400 165 412 186"/>
+
+      <rect class="val" x="46" y="190" width="66" height="40" rx="4"/><text class="vt" x="62" y="216">18.4</text>
+      <rect class="val" x="176" y="190" width="66" height="40" rx="4"/><text class="vt" x="192" y="216">21.0</text>
+      <rect class="val" x="304" y="190" width="66" height="40" rx="4"/><text class="vt" x="320" y="216">17.2</text>
+      <rect class="val" x="380" y="190" width="66" height="40" rx="4"/><text class="vt" x="396" y="216">19.9</text>
+      <rect class="val" x="454" y="190" width="66" height="40" rx="4"/><text class="vt" x="470" y="216">22.1</text>
+
+      <text class="dw" x="20" y="266">Values live wherever there was room, each with a type tag attached.</text>
+      <text class="dw" x="20" y="288">“Add 1 to everything” becomes a million separate errands: follow the</text>
+      <text class="dw" x="20" y="310">pointer, check the type, fetch, add, store, come back. And again.</text>
+      <text class="dw" x="20" y="340" fill="#ff987f">Flexible enough to hold a number, a string and a dictionary at once.</text>
+
+      <path d="M560 20 L560 350" stroke="#56635e" stroke-width="2"/>
+
+      <text class="hl" x="600" y="26">NUMPY ARRAY &middot; RIGID, AND FAST BECAUSE OF IT</text>
+      <text class="hw" x="600" y="52">One unbroken block, values nose to tail</text>
+      <rect class="blk" x="600" y="70" width="76" height="42"/><text class="vt" x="620" y="97">18.4</text>
+      <rect class="blk" x="676" y="70" width="76" height="42"/><text class="vt" x="696" y="97">21.0</text>
+      <rect class="blk" x="752" y="70" width="76" height="42"/><text class="vt" x="772" y="97">17.2</text>
+      <rect class="blk" x="828" y="70" width="76" height="42"/><text class="vt" x="848" y="97">19.9</text>
+      <rect class="blk" x="904" y="70" width="76" height="42"/><text class="vt" x="924" y="97">22.1</text>
+      <path d="M600 130 L980 130" stroke="#ff987f" stroke-width="3" marker-end="url(#ar5)"/>
+      <text class="hl" x="600" y="152">ONE WALK, STRAIGHT THROUGH</text>
+
+      <text class="dw" x="600" y="196">Every item is the same type, therefore the same size, therefore</text>
+      <text class="dw" x="600" y="218">predictable in position. No pointers. No type checks. No errands.</text>
+      <text class="dw" x="600" y="248">“Add 1 to everything” becomes one instruction handed down to</text>
+      <text class="dw" x="600" y="270">compiled C code that walks the block from end to end.</text>
+      <text class="dw" x="600" y="310" fill="#c9e2d5">Typically ten to a hundred times faster, on less memory.</text>
+      <text class="dw" x="600" y="340" fill="#ff987f">The price: one type only, and no ragged edges.</text>
+    </svg>
+    <figcaption>This is the whole trade. A list can hold anything, so it must hold addresses. An array holds one kind of thing, so it can hold the things themselves.</figcaption>
+  </figure>
+
+  <h3 style="color:#fffaf0;margin-top:52px">Where the C comes from, and why it is there at all</h3>
+  <p class="lead">Nothing in this section asks you to learn C. But it is worth knowing that it is underneath you, because it explains the whole trick.</p>
+
+  <div class="grid" style="margin-top:26px">
+    <article class="card span-4"><span class="label">Fact one</span><h3>Python itself is a C program</h3><p>The thing that runs when you type <span class="mono">python</span> is an interpreter called CPython, written in the C language and compiled into machine code long ago.</p><p>So even a plain Python <span class="mono">for</span> loop is, underneath, C code reading your instructions one at a time and doing as it is told. That is true before NumPy appears anywhere.</p></article>
+    <article class="card span-4"><span class="label">Fact two</span><h3>NumPy is not written in Python</h3><p>It is a Python <em>package</em> &mdash; you install it with pip and import it like anything else &mdash; but its working parts are C, compiled before it ever reached your machine.</p><p>The Python you write is a thin steering layer sitting on top of that compiled code.</p></article>
+    <article class="card span-4"><span class="label">Fact three</span><h3>The handover</h3><p>When you write <span class="mono">temperatures * 9/5 + 32</span>, Python does not do the arithmetic. It sees the <span class="mono">*</span>, recognises a NumPy array, and hands the whole job downward: here is a block of a million numbers, here is the operation, get on with it.</p><p>Your interpreter did about three things. The C did a million.</p></article>
+  </div>
+
+  <div class="annotation" style="background:#2c3a35;border-color:#e6a33c;color:#e9e2d6"><strong style="color:#fffaf0">Compiled versus interpreted &mdash; that is the whole difference.</strong> Compiled code has already been translated into machine instructions and runs flat out. Interpreted code, like the Python you write, is worked out line by line as it goes, which is what makes it pleasant to write and slow to execute. The scientific Python stack is built on one idea: <em>write in the friendly slow language, execute in the fast unfriendly one</em> &mdash; which only works if you hand work down in big uniform chunks rather than one item at a time. That condition is exactly why an array must be one type with no ragged edges.</div>
+
+  <h3 style="color:#fffaf0;margin-top:44px">What the rigidity changes in how you write</h3>
+  <p class="lead">Speed is only half of it. The other half is that you stop writing loops — and that is the genuine mental shift NumPy asks of you.</p>
+
+  <div class="code-pair">
+    <div>
+      <div class="cap"><span class="mini-label">The loop you would have written</span><strong>Item by item</strong></div>
+<pre>fahrenheit = []
+
+<span class="k">for</span> c <span class="k">in</span> temperatures:
+    fahrenheit.append(c * 9/5 + 32)
+
+<span class="c"># One trip round the loop</span>
+<span class="c"># per temperature.</span></pre>
+    </div>
+    <div>
+      <div class="cap"><span class="mini-label">The same thing, vectorised</span><strong>Whole array at once</strong></div>
+<pre>fahrenheit = temperatures * 9/5 + 32
+
+
+
+
+<span class="c"># One line. All million values.</span>
+<span class="c"># The loop still happens — in C.</span></pre>
+    </div>
+  </div>
+
+  <div class="warning"><strong>The shift in wording:</strong> you stop thinking <em>“for each item, do this”</em> and start thinking <em>“do this to the whole thing”</em>. The looping has not vanished. It has moved somewhere far below you, where it is cheap.</div>
+</div></section>
+
+<section id="family"><div class="shell">
+  <div class="section-head"><div class="section-no">07 / THE FAMILY</div><div><h2>Who does what, and who sits on whom</h2><p class="lead">Four names get thrown at you at once. They are not competitors. They stack.</p></div></div>
+
+  <figure class="figure">
+    <span class="mini-label">Figure 06 &middot; The stack, bottom to top</span>
+    <svg viewBox="0 0 900 300" role="img" aria-labelledby="st-t st-d">
+      <title id="st-t">How the tools stack</title>
+      <desc id="st-d">Charting libraries sit on pandas, pandas sits on NumPy, NumPy sits on compiled C. SQL sits alongside, upstream, in the database.</desc>
+      <style>
+        .lay{stroke:#174f3f;stroke-width:2.5}
+        .lt{font:700 19px Georgia,serif;fill:#17201d}
+        .ls{font:14px Georgia,serif;fill:#5d6863}
+        .ll{font:700 11px ui-monospace,monospace;fill:#cf6046;letter-spacing:.08em}
+      </style>
+      <rect class="lay" x="230" y="16" width="430" height="52" fill="#eee7d8"/>
+      <text class="lt" x="252" y="40">matplotlib · seaborn · plotly</text><text class="ls" x="252" y="60">drawing tools that take shaped data and make pictures</text>
+      <rect class="lay" x="230" y="76" width="430" height="52" fill="#c9e2d5"/>
+      <text class="lt" x="252" y="100">pandas</text><text class="ls" x="252" y="120">arrays with column names, an index, and mixed column types</text>
+      <rect class="lay" x="230" y="136" width="430" height="52" fill="#9dc7b3"/>
+      <text class="lt" x="252" y="160">NumPy</text><text class="ls" x="252" y="180">rectangular blocks of one type — the engine</text>
+      <rect class="lay" x="230" y="196" width="430" height="52" fill="#174f3f"/>
+      <text class="lt" x="252" y="220" style="fill:#eee7d8">compiled C &mdash; you never touch this</text><text class="ls" x="252" y="240" style="fill:#eee7d8;opacity:.82">where the looping actually happens, out of sight</text>
+
+      <rect class="lay" x="20" y="76" width="180" height="112" fill="#f6e2d9" stroke="#cf6046"/>
+      <text class="lt" x="42" y="112">SQL</text>
+      <text class="ls" x="42" y="136">upstream, and</text><text class="ls" x="42" y="156">somewhere else</text><text class="ls" x="42" y="176">entirely</text>
+      <path d="M200 132 L228 132" stroke="#cf6046" stroke-width="4"/>
+      <text class="ll" x="20" y="64">IN THE DATABASE</text>
+      <text class="ll" x="230" y="272">ON YOUR MACHINE · EACH LAYER USES THE ONE BENEATH IT</text>
+    </svg>
+    <figcaption>A pandas column <em>is</em> a NumPy array with a label stuck on it. That is why pandas is fast, and why <span class="mono">df["price"] * 1.2</span> works without a loop — you are using NumPy vectorisation through a pandas wrapper.</figcaption>
+  </figure>
+
+  <div class="strength">
+    <div class="a"><span class="mini-label">Upstream</span><h3>SQL</h3><p>When the data is bigger than your machine, or lives in a company system you have to ask nicely.</p></div>
+    <div class="b"><span class="mini-label">Underneath</span><h3>NumPy</h3><p>When the work is numerical, heavy and uniform. Also whenever you drop below pandas to fix something.</p></div>
+    <div class="c"><span class="mini-label">Daily driver</span><h3>pandas</h3><p>Nearly everything. Real tables where one column is names and the next is prices.</p></div>
+    <div class="d"><span class="mini-label">Last mile</span><h3>Charting</h3><p>Once the answer exists and needs to be seen by someone who will not read your code.</p></div>
+  </div>
+
+  <div class="annotation"><strong>Which explains why NumPy is taught before you are convinced you need it.</strong> You will use pandas for nearly everything. NumPy is underneath, and you meet it face to face only when the work turns purely numerical — but its rules are leaking through the wrapper the entire time.</div>
+</div></section>
+
+<section id="viz"><div class="shell">
+  <div class="section-head"><div class="section-no">08 / VISUALISATION</div><div><h2>A stage, not a decoration</h2><p class="lead">Charts do a job tables cannot, and the reason is physiological rather than aesthetic: the eye detects shape faster than the mind reads numbers. But this is the most nuanced stage on the route, and it deserves three passes rather than one — because there are three separate ways to be misled here, and they fail in different directions.</p></div></div>
+
+  <div class="grid" style="margin-bottom:44px">
+    <article class="card span-4"><span class="label">Movement one</span><h3>The numbers alone will fool you</h3><p>Identical summary statistics can sit on top of completely different realities. Only the picture separates them.</p></article>
+    <article class="card span-4"><span class="label">Movement two</span><h3>The grain alone will fool you</h3><p>Pool the subgroups and the trend can run backwards. Both figures are arithmetically correct.</p></article>
+    <article class="card span-4"><span class="label">Movement three</span><h3>The picture alone will fool you</h3><p>A chart is a set of choices. Some of those choices manufacture a story that is not in the data.</p></article>
+  </div>
+
+  <div style="margin-bottom:10px"><span class="mini-label">Movement one</span><h3 style="font-size:1.9rem;margin-top:6px">Identical statistics, four different worlds</h3></div>
+  <p>Francis Anscombe built the quartet in 1973 to argue that statisticians were leaning too hard on computation. Four datasets of eleven points each, agreeing to two decimal places on the mean of x, the mean of y, the variance of both, the correlation coefficient and the regression line. Feed any of them into a stats package and the same summary comes back.</p>
+
+  <figure class="figure">
+    <span class="mini-label">Figure 07 &middot; Anscombe's Quartet — four datasets, identical statistics</span>
+    <svg viewBox="0 0 1000 280" role="img" aria-labelledby="an-t an-d">
+      <title id="an-t">Anscombe's Quartet</title>
+      <desc id="an-d">Four scatter plots sharing the same mean, variance, correlation and regression line. The first is a loose linear relationship, the second a clean curve, the third a straight line dragged off course by one outlier, the fourth a single vertical column with one distant point.</desc>
+      <style>
+        .fr{fill:#fffdf7;stroke:#cfc9bb;stroke-width:1.5}
+        .pt2{fill:#174f3f}
+        .reg{stroke:#cf6046;stroke-width:2.5}
+        .cl{font:700 11px ui-monospace,monospace;fill:#cf6046;letter-spacing:.06em}
+        .cd{font:13px Georgia,serif;fill:#5d6863}
+      </style>
+
+      <g>
+        <rect class="fr" x="20" y="20" width="210" height="160"/>
+        <path class="reg" d="M36 164 L214 44"/>
+        <circle class="pt2" cx="58" cy="150" r="4"/><circle class="pt2" cx="76" cy="128" r="4"/><circle class="pt2" cx="96" cy="140" r="4"/><circle class="pt2" cx="112" cy="106" r="4"/><circle class="pt2" cx="130" cy="118" r="4"/><circle class="pt2" cx="148" cy="86" r="4"/><circle class="pt2" cx="166" cy="94" r="4"/><circle class="pt2" cx="184" cy="62" r="4"/><circle class="pt2" cx="200" cy="74" r="4"/>
+        <text class="cl" x="20" y="200">DATASET I</text>
+        <text class="cd" x="20" y="222">A loose linear</text><text class="cd" x="20" y="240">relationship.</text>
+      </g>
+
+      <g>
+        <rect class="fr" x="256" y="20" width="210" height="160"/>
+        <path class="reg" d="M272 164 L450 44"/>
+        <circle class="pt2" cx="292" cy="158" r="4"/><circle class="pt2" cx="312" cy="128" r="4"/><circle class="pt2" cx="332" cy="104" r="4"/><circle class="pt2" cx="352" cy="88" r="4"/><circle class="pt2" cx="372" cy="80" r="4"/><circle class="pt2" cx="392" cy="82" r="4"/><circle class="pt2" cx="412" cy="94" r="4"/><circle class="pt2" cx="432" cy="116" r="4"/><circle class="pt2" cx="448" cy="140" r="4"/>
+        <text class="cl" x="256" y="200">DATASET II</text>
+        <text class="cd" x="256" y="222">Not linear at all.</text><text class="cd" x="256" y="240">A clean curve.</text>
+      </g>
+
+      <g>
+        <rect class="fr" x="492" y="20" width="210" height="160"/>
+        <path class="reg" d="M508 160 L686 44"/>
+        <circle class="pt2" cx="524" cy="158" r="4"/><circle class="pt2" cx="544" cy="148" r="4"/><circle class="pt2" cx="564" cy="138" r="4"/><circle class="pt2" cx="584" cy="128" r="4"/><circle class="pt2" cx="604" cy="118" r="4"/><circle class="pt2" cx="624" cy="108" r="4"/><circle class="pt2" cx="644" cy="98" r="4"/><circle class="pt2" cx="664" cy="88" r="4"/>
+        <circle cx="600" cy="40" r="7" fill="#cf6046"/>
+        <text class="cl" x="492" y="200">DATASET III</text>
+        <text class="cd" x="492" y="222">A perfect line, plus</text><text class="cd" x="492" y="240">one outlier dragging it.</text>
+      </g>
+
+      <g>
+        <rect class="fr" x="728" y="20" width="210" height="160"/>
+        <path class="reg" d="M744 160 L922 44"/>
+        <circle class="pt2" cx="790" cy="160" r="4"/><circle class="pt2" cx="790" cy="142" r="4"/><circle class="pt2" cx="790" cy="126" r="4"/><circle class="pt2" cx="790" cy="110" r="4"/><circle class="pt2" cx="790" cy="94" r="4"/><circle class="pt2" cx="790" cy="78" r="4"/><circle class="pt2" cx="790" cy="62" r="4"/>
+        <circle cx="908" cy="46" r="7" fill="#cf6046"/>
+        <text class="cl" x="728" y="200">DATASET IV</text>
+        <text class="cd" x="728" y="222">One column of points</text><text class="cd" x="728" y="240">and one lone leverage point.</text>
+      </g>
+    </svg>
+    <figcaption>Identical means. Identical variances. Identical correlation. Identical regression lines — the coral line is the same line in all four panels. On every summary statistic these are the same dataset. Plot them and they are obviously, wildly different. Worth looking up properly; this is a sketch of the real thing.</figcaption>
+  </figure>
+
+    <div class="grid">
+    <article class="card span-6"><span class="label">What the four are doing</span><h3>Reading the panels</h3><p><strong>I</strong> is a genuine, noisy linear relationship &mdash; the line is a fair summary of it. <strong>II</strong> is a clean curve: the relationship is real and strong, but it is not a line, so a line is simply the wrong model.</p><p><strong>III</strong> is a perfect straight line plus one distant point, and that point tilts the fitted line until it misses every real observation. <strong>IV</strong> has ten points sharing one x value and a single point far to the right, and that lone point is dictating the whole slope. Remove it and there is no relationship left to fit.</p></article>
+    <article class="card span-6"><span class="label">The modern remake</span><h3>The Datasaurus Dozen</h3><p>Justin Matejka and George Fitzmaurice later built a set of thirteen datasets that agree on their summary statistics to two decimal places &mdash; among them a star, a circle, a set of parallel lines, and a dinosaur.</p><p>It is the same lesson as Anscombe with the volume turned up, and it is worth looking at because the laugh is what makes the point stick. If a dinosaur and a star can share a mean, a variance and a correlation, those three numbers were never describing the shape of anything.</p></article>
+  </div>
+
+  <div class="annotation"><strong>Note the direction of Anscombe&rsquo;s argument.</strong> It is not that pictures lie. It is the reverse: here the numbers lied and the picture told the truth. Four different realities, one identical set of statistics. Hold that, because the next two movements run the other way.</div>
+
+  <div style="margin:64px 0 10px"><span class="mini-label">Movement two</span><h3 style="font-size:1.9rem;margin-top:6px">When pooling reverses the answer</h3></div>
+  <p class="lead">This is the hinge of the whole guide, and it reaches back to section 02. Aggregation does not merely lose detail. Under the right conditions it inverts the conclusion &mdash; and both the pooled figure and the subgroup figures are arithmetically correct at the same time.</p>
+
+  <div class="grid" style="margin-bottom:34px">
+    <article class="card span-6"><span class="label">First, the word</span><h3>What pooling means</h3><p>Pooling means you throw two groups into one pile and count them together as if they were one group.</p><p>Not averaging the two percentages. Adding up the raw numbers &mdash; all the successes, all the patients &mdash; and working out one percentage from the combined pile.</p></article>
+    <article class="card span-6"><span class="label">Then, the surprise</span><h3>What can happen when you do</h3><p>A result that holds in every group can reverse when you combine the groups.</p><p>Nothing is done to the data. Nobody cheats. Both figures are calculated correctly. You simply get a different answer depending on whether you keep the groups separate or throw them in one pile. That situation has a name: Simpson&rsquo;s paradox.</p></article>
+  </div>
+
+  <h3 style="margin-top:44px">The case: two kidney stone treatments</h3>
+  <p>Two treatments, A and B, each given to 350 patients. Patients are split into two kinds: small stones, which are easier to treat, and large stones, which are harder. Success rates were recorded for each kind separately, and then for everyone together.</p>
+
+  <figure class="figure">
+    <span class="mini-label">Figure 08 &middot; A wins on small stones. A wins on large stones. B wins overall.</span>
+    <svg viewBox="0 0 1000 430" role="img" aria-labelledby="ks-t ks-d">
+      <title id="ks-t">Kidney stone treatment success rates</title>
+      <desc id="ks-d">On small stones treatment A succeeds 93 per cent against B's 87. On large stones A succeeds 73 per cent against B's 69. Pooling all patients together, A drops to 78 per cent and B rises to 83, reversing the result.</desc>
+      <style>
+        .kA{fill:#174f3f;stroke:#174f3f}
+        .kB{fill:#c9e2d5;stroke:#174f3f;stroke-width:2}
+        .kax{stroke:#5d6863;stroke-width:2}
+        .kg{stroke:#e2dccf;stroke-width:1}
+        .kpct{font:700 17px Georgia,serif;fill:#17201d}
+        .kname{font:700 13px ui-monospace,monospace;fill:#5d6863;letter-spacing:.06em}
+        .khead{font:700 15px ui-monospace,monospace;fill:#cf6046;letter-spacing:.07em}
+        .kraw{font:12px ui-monospace,monospace;fill:#5d6863}
+        .kwin{font:700 13px ui-monospace,monospace;fill:#cf6046;letter-spacing:.06em}
+      </style>
+
+      <path class="kg" d="M60 340 L960 340 M60 270 L960 270 M60 200 L960 200 M60 130 L960 130 M60 60 L960 60"/>
+      <text class="kraw" x="24" y="345">0%</text><text class="kraw" x="20" y="205">50%</text><text class="kraw" x="16" y="65">100%</text>
+      <path class="kax" d="M60 340 L960 340"/>
+
+      <text class="khead" x="112" y="34">SMALL STONES · EASY</text>
+      <rect class="kA" x="112" y="80" width="66" height="260"/>
+      <text class="kpct" x="120" y="70" fill="#174f3f">93%</text>
+      <text class="kraw" x="112" y="362">A · 81 of 87</text>
+      <rect class="kB" x="192" y="96" width="66" height="244"/>
+      <text class="kpct" x="200" y="86">87%</text>
+      <text class="kraw" x="192" y="362">B · 234 of 270</text>
+      <text class="kwin" x="112" y="388">A IS AHEAD</text>
+
+      <text class="khead" x="420" y="34">LARGE STONES · HARD</text>
+      <rect class="kA" x="420" y="136" width="66" height="204"/>
+      <text class="kpct" x="428" y="126" fill="#174f3f">73%</text>
+      <text class="kraw" x="420" y="362">A · 192 of 263</text>
+      <rect class="kB" x="500" y="147" width="66" height="193"/>
+      <text class="kpct" x="508" y="137">69%</text>
+      <text class="kraw" x="500" y="362">B · 55 of 80</text>
+      <text class="kwin" x="420" y="388">A IS AHEAD</text>
+
+      <path d="M700 20 L700 400" stroke="#cf6046" stroke-width="2" stroke-dasharray="8 6"/>
+      <text class="khead" x="740" y="34">EVERYONE POOLED</text>
+      <rect class="kA" x="740" y="122" width="66" height="218"/>
+      <text class="kpct" x="748" y="112" fill="#174f3f">78%</text>
+      <text class="kraw" x="740" y="362">A · 273 of 350</text>
+      <rect class="kB" x="820" y="108" width="66" height="232"/>
+      <text class="kpct" x="828" y="98">83%</text>
+      <text class="kraw" x="820" y="362">B · 289 of 350</text>
+      <text class="kwin" x="740" y="388">B IS AHEAD</text>
+
+      <rect x="112" y="404" width="16" height="14" fill="#174f3f"/><text class="kname" x="136" y="416">TREATMENT A</text>
+      <rect x="280" y="404" width="16" height="14" fill="#c9e2d5" stroke="#174f3f" stroke-width="2"/><text class="kname" x="304" y="416">TREATMENT B</text>
+    </svg>
+    <figcaption>Read left to right. In the first pair A is higher. In the second pair A is higher. In the third pair &mdash; the same patients, just counted in one pile &mdash; A is lower.</figcaption>
+  </figure>
+
+  <h3 style="margin-top:44px">The arithmetic, in full</h3>
+  <p>Pooling is addition, and nothing else. Add the successes, add the patients, divide.</p>
+
+  <table style="margin:24px 0 34px">
+    <thead><tr><th></th><th>Treatment A</th><th>Treatment B</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Small stones</strong></td><td>81 successes out of 87 &nbsp;&rarr;&nbsp; <span class="mono">93%</span></td><td>234 successes out of 270 &nbsp;&rarr;&nbsp; <span class="mono">87%</span></td></tr>
+      <tr><td><strong>Large stones</strong></td><td>192 successes out of 263 &nbsp;&rarr;&nbsp; <span class="mono">73%</span></td><td>55 successes out of 80 &nbsp;&rarr;&nbsp; <span class="mono">69%</span></td></tr>
+      <tr><td><strong>Pooled</strong><br><span style="color:#5d6863;font-size:.9em">add the successes, add the patients</span></td><td>81 + 192 = 273<br>87 + 263 = 350<br>273 out of 350 &nbsp;&rarr;&nbsp; <span class="mono">78%</span></td><td>234 + 55 = 289<br>270 + 80 = 350<br>289 out of 350 &nbsp;&rarr;&nbsp; <span class="mono">83%</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:44px">Why A loses despite winning both</h3>
+  <p>Look at who each treatment was actually given to.</p>
+
+  <figure class="figure">
+    <span class="mini-label">Figure 09 &middot; The caseloads were not the same</span>
+    <svg viewBox="0 0 1000 300" role="img" aria-labelledby="cl-t cl-d">
+      <title id="cl-t">Caseload split between the two treatments</title>
+      <desc id="cl-d">Treatment A treated 263 large stones and 87 small ones. Treatment B treated 270 small stones and 80 large ones. A did mostly hard cases, B did mostly easy ones.</desc>
+      <style>
+        .hard{fill:#cf6046}
+        .easy{fill:#c9e2d5;stroke:#174f3f;stroke-width:2}
+        .clab{font:700 19px Georgia,serif;fill:#17201d}
+        .cin{font:700 15px ui-monospace,monospace;fill:#fffdf7}
+        .cin2{font:700 15px ui-monospace,monospace;fill:#17201d}
+        .cnote{font:15px Georgia,serif;fill:#5d6863}
+        .ch{font:700 12px ui-monospace,monospace;fill:#5d6863;letter-spacing:.07em}
+      </style>
+
+      <text class="ch" x="180" y="34">EACH BAR IS 350 PATIENTS</text>
+
+      <text class="clab" x="20" y="90">Treatment A</text>
+      <rect class="hard" x="180" y="60" width="601" height="46"/>
+      <text class="cin" x="380" y="90">263 LARGE STONES · HARD</text>
+      <rect class="easy" x="781" y="60" width="199" height="46"/>
+      <text class="cin2" x="800" y="90">87 SMALL</text>
+      <text class="cnote" x="180" y="130">Three quarters of A&rsquo;s patients were the difficult kind.</text>
+
+      <text class="clab" x="20" y="200">Treatment B</text>
+      <rect class="easy" x="180" y="170" width="617" height="46"/>
+      <text class="cin2" x="360" y="200">270 SMALL STONES · EASY</text>
+      <rect class="hard" x="797" y="170" width="183" height="46"/>
+      <text class="cin" x="812" y="200">80 LARGE</text>
+      <text class="cnote" x="180" y="240">Three quarters of B&rsquo;s patients were the easy kind.</text>
+
+      <text class="cnote" x="180" y="284" fill="#cf6046">A did mostly the hard job. B did mostly the easy job. The pooled figure reports that difference, not the treatments.</text>
+    </svg>
+    <figcaption>Large stones are harder, so everyone scores lower on them &mdash; A gets 73%, B gets 69%. Small stones are easy, so everyone scores higher &mdash; A gets 93%, B gets 87%.</figcaption>
+  </figure>
+
+  <p>A&rsquo;s pooled score is dragged <strong>down</strong> towards the 73%, because three quarters of A&rsquo;s patients were large stones. B&rsquo;s pooled score is pulled <strong>up</strong> towards the 87%, because three quarters of B&rsquo;s patients were small stones.</p>
+
+  <div class="quote">Pooling hid the fact that the two treatments were not given the same mix of patients. The combined figure ends up reporting the difficulty of the caseload instead of the quality of the treatment.<small>What went wrong, in one sentence</small></div>
+
+  <h3 style="margin-top:52px">The same thing, at scale: Berkeley, 1973</h3>
+  <p>Graduate admissions figures for the University of California, Berkeley appeared to show men being admitted at a notably higher rate than women. Broken down by department, the picture changed.</p>
+
+  <figure class="figure">
+    <span class="mini-label">Figure 10 &middot; The pooled rate said one thing; the departments said another</span>
+    <svg viewBox="0 0 1000 340" role="img" aria-labelledby="bk-t bk-d">
+      <title id="bk-t">Berkeley admissions, pooled versus by department</title>
+      <desc id="bk-d">Pooled, men were admitted at 44 per cent and women at 35. Department by department the rates were close or slightly favoured women, but women applied overwhelmingly to the departments with the lowest admission rates.</desc>
+      <style>
+        .m{fill:#174f3f}
+        .w{fill:#cf6046}
+        .bax{stroke:#5d6863;stroke-width:2}
+        .bg2{stroke:#e2dccf;stroke-width:1}
+        .bh{font:700 13px ui-monospace,monospace;fill:#cf6046;letter-spacing:.07em}
+        .bp{font:700 15px Georgia,serif;fill:#17201d}
+        .bs{font:12px ui-monospace,monospace;fill:#5d6863}
+        .bn{font:14px Georgia,serif;fill:#5d6863}
+      </style>
+
+      <text class="bh" x="20" y="30">POOLED · ALL DEPARTMENTS TOGETHER</text>
+      <path class="bax" d="M20 200 L300 200"/>
+      <rect class="m" x="50" y="90" width="70" height="110"/><text class="bp" x="56" y="80">44%</text><text class="bs" x="56" y="220">MEN</text>
+      <rect class="w" x="150" y="112" width="70" height="88"/><text class="bp" x="156" y="102">35%</text><text class="bs" x="150" y="220">WOMEN</text>
+      <text class="bn" x="20" y="256">A nine point gap. This is the figure</text>
+      <text class="bn" x="20" y="278">that caused the alarm.</text>
+
+      <path d="M330 20 L330 320" stroke="#cfc9bb" stroke-width="2"/>
+
+      <text class="bh" x="366" y="30">BY DEPARTMENT · WITH APPLICANT NUMBERS</text>
+      <path class="bax" d="M366 200 L970 200"/>
+
+      <rect class="m" x="380" y="52" width="26" height="148"/><rect class="w" x="410" y="46" width="26" height="154"/>
+      <text class="bs" x="380" y="220">DEPT A</text><text class="bs" x="380" y="238">825 m</text><text class="bs" x="380" y="254">108 w</text>
+
+      <rect class="m" x="470" y="60" width="26" height="140"/><rect class="w" x="500" y="56" width="26" height="144"/>
+      <text class="bs" x="470" y="220">DEPT B</text><text class="bs" x="470" y="238">560 m</text><text class="bs" x="470" y="254">25 w</text>
+
+      <rect class="m" x="560" y="124" width="26" height="76"/><rect class="w" x="590" y="118" width="26" height="82"/>
+      <text class="bs" x="560" y="220">DEPT C</text><text class="bs" x="560" y="238">325 m</text><text class="bs" x="560" y="254">593 w</text>
+
+      <rect class="m" x="650" y="130" width="26" height="70"/><rect class="w" x="680" y="128" width="26" height="72"/>
+      <text class="bs" x="650" y="220">DEPT D</text><text class="bs" x="650" y="238">417 m</text><text class="bs" x="650" y="254">375 w</text>
+
+      <rect class="m" x="740" y="152" width="26" height="48"/><rect class="w" x="770" y="148" width="26" height="52"/>
+      <text class="bs" x="740" y="220">DEPT E</text><text class="bs" x="740" y="238">191 m</text><text class="bs" x="740" y="254">393 w</text>
+
+      <rect class="m" x="830" y="186" width="26" height="14"/><rect class="w" x="860" y="186" width="26" height="14"/>
+      <text class="bs" x="830" y="220">DEPT F</text><text class="bs" x="830" y="238">373 m</text><text class="bs" x="830" y="254">341 w</text>
+
+      <path d="M366 288 L560 288" stroke="#174f3f" stroke-width="3"/>
+      <text class="bn" x="366" y="312" fill="#174f3f">Easy to get into. Mostly men applied.</text>
+      <path d="M700 288 L968 288" stroke="#cf6046" stroke-width="3"/>
+      <text class="bn" x="700" y="312" fill="#cf6046">Hard to get into. Mostly women applied.</text>
+    </svg>
+    <figcaption>Departments A and B admitted most applicants and received overwhelmingly male applications. Departments C, E and F rejected most applicants and received far more female ones. Within almost every department the rates were close, and several slightly favoured women. The nine point pooled gap was reporting which departments people applied to. Later scholarship has complicated the tidy version of this story, so read it rather than repeat it.</figcaption>
+  </figure>
+
+  <div class="warning"><strong>The practical test:</strong> before trusting any pooled figure, ask what groups sit inside it and whether those groups appear in different proportions. If they do, calculate the same thing inside each group. If the two answers disagree, the disagreement is the finding.</div>
+
+  <div style="margin:64px 0 10px"><span class="mini-label">Movement three</span><h3 style="font-size:1.9rem;margin-top:6px">A chart is a set of choices</h3></div>
+  <p class="lead">Every plot involves decisions that are invisible in the finished image: where the axis starts, which rows were included, what the date window is, whether a quantity is encoded as length or as area. Some of those decisions manufacture a story that is not in the data &mdash; sometimes deliberately, and often not.</p>
+
+  <figure class="figure">
+    <span class="mini-label">Figure 11 &middot; The truncated axis &mdash; identical numbers, two stories</span>
+    <svg viewBox="0 0 1000 320" role="img" aria-labelledby="tr-t tr-d">
+      <title id="tr-t">Truncated axis comparison</title>
+      <desc id="tr-d">The same five values plotted twice. On an axis starting at zero the bars are nearly equal. On an axis starting just below the lowest value the same bars appear to climb steeply.</desc>
+      <style>
+        .fr4{fill:#fffdf7;stroke:#cfc9bb;stroke-width:1.5}
+        .bar{fill:#c9e2d5;stroke:#174f3f;stroke-width:2}
+        .barx{fill:#f6e2d9;stroke:#cf6046;stroke-width:2}
+        .ax4{stroke:#5d6863;stroke-width:2}
+        .tk{font:12px ui-monospace,monospace;fill:#5d6863}
+        .hd{font:700 17px Georgia,serif;fill:#17201d}
+        .lb2{font:700 12px ui-monospace,monospace;letter-spacing:.07em}
+        .nt{font:14px Georgia,serif;fill:#5d6863}
+      </style>
+
+      <rect class="fr4" x="20" y="20" width="450" height="240"/>
+      <text class="lb2" x="40" y="46" fill="#174f3f">AXIS STARTS AT ZERO</text>
+      <path class="ax4" d="M96 232 L440 232 M96 232 L96 60"/>
+      <text class="tk" x="66" y="236">0</text><text class="tk" x="60" y="150">50</text><text class="tk" x="54" y="66">100</text>
+      <rect class="bar" x="120" y="146" width="52" height="86"/>
+      <rect class="bar" x="186" y="143" width="52" height="89"/>
+      <rect class="bar" x="252" y="140" width="52" height="92"/>
+      <rect class="bar" x="318" y="137" width="52" height="95"/>
+      <rect class="bar" x="384" y="134" width="52" height="98"/>
+      <text class="nt" x="40" y="284">A gentle drift upward. Roughly a</text>
+      <text class="nt" x="40" y="306">seven per cent change end to end.</text>
+
+      <rect class="fr4" x="510" y="20" width="450" height="240"/>
+      <text class="lb2" x="530" y="46" fill="#cf6046">AXIS STARTS AT 49</text>
+      <path class="ax4" d="M586 232 L930 232 M586 232 L586 60"/>
+      <text class="tk" x="556" y="236">49</text><text class="tk" x="556" y="150">52</text><text class="tk" x="556" y="66">55</text>
+      <rect class="barx" x="610" y="204" width="52" height="28"/>
+      <rect class="barx" x="676" y="172" width="52" height="60"/>
+      <rect class="barx" x="742" y="140" width="52" height="92"/>
+      <rect class="barx" x="808" y="108" width="52" height="124"/>
+      <rect class="barx" x="874" y="76" width="52" height="156"/>
+      <text class="nt" x="530" y="284" fill="#cf6046">A steep climb. Same five numbers.</text>
+      <text class="nt" x="530" y="306" fill="#cf6046">Nothing has been falsified.</text>
+    </svg>
+    <figcaption>Truncation is not automatically dishonest &mdash; for some quantities it is the only readable choice. What makes it a lie is failing to mark it, so the reader takes bar height as proportional to value when it no longer is.</figcaption>
+  </figure>
+
+  <div class="grid">
+    <article class="card span-3"><span class="label">Trick</span><h3>Dual axes</h3><p>Two series, two independently scaled y axes. Slide either scale and you can make almost any pair of lines appear to move together.</p></article>
+    <article class="card span-3"><span class="label">Trick</span><h3>The chosen window</h3><p>Start the date range at a trough and end it at a peak. Every point plotted is real; the window did the arguing.</p></article>
+    <article class="card span-3"><span class="label">Trick</span><h3>Area for length</h3><p>Encode a value as the width of a circle or icon and the eye reads its area. Double the number, quadruple the ink.</p></article>
+    <article class="card span-3"><span class="label">Trick</span><h3>Perspective</h3><p>A tilted three-dimensional pie makes the nearest slice look largest regardless of what it holds.</p></article>
+  </div>
+
+  <p style="margin-top:38px">Those four are cosmetic and mostly easy to catch once you know the moves. The serious failure is different, and it is a failure of <em>omission</em> &mdash; a chart that is honestly drawn from the wrong rows.</p>
+
+  <div class="card" style="margin:30px 0 8px;border-left:6px solid var(--coral)">
+    <span class="label">The scenario</span>
+    <h3>Cape Canaveral, the night of 27 January 1986</h3>
+    <p>The space shuttle Challenger is due to launch the next morning. The forecast overnight temperature at the launch pad is far colder than any previous shuttle flight has ever experienced.</p>
+    <p>Engineers at the firm that builds the solid rocket boosters believe this is dangerous. The boosters are sealed by rubber rings called O-rings, and rubber stiffens as it gets cold. A stiff O-ring seals more slowly, and if it fails, burning gas escapes from the side of the booster. They want the launch delayed.</p>
+    <p>They join a late-night conference call with NASA to make that argument, and they bring charts showing O-ring damage on previous flights. The charts below are the shape of what they presented, and the shape of what they could have presented instead.</p>
+  </div>
+
+  <figure class="figure">
+    <span class="mini-label">Figure 12 &middot; The omission &mdash; Challenger, the night before</span>
+    <svg viewBox="0 0 1000 330" role="img" aria-labelledby="ch-t ch-d">
+      <title id="ch-t">Challenger O-ring damage against launch temperature</title>
+      <desc id="ch-d">On the left, only flights that suffered damage are plotted, and no pattern is visible. On the right the flights with no damage are restored, all of them at warm temperatures, and the relationship between cold and failure becomes obvious.</desc>
+      <style>
+        .fr5{fill:#fffdf7;stroke:#cfc9bb;stroke-width:1.5}
+        .ax5{stroke:#5d6863;stroke-width:2}
+        .dmg{fill:#174f3f}
+        .none{fill:#cf6046}
+        .hd2{font:700 12px ui-monospace,monospace;letter-spacing:.07em}
+        .nt2{font:14px Georgia,serif;fill:#5d6863}
+        .tk2{font:11px ui-monospace,monospace;fill:#5d6863}
+      </style>
+
+      <rect class="fr5" x="20" y="20" width="450" height="220"/>
+      <text class="hd2" x="40" y="46" fill="#174f3f">AS PRESENTED &middot; DAMAGED FLIGHTS ONLY</text>
+      <path class="ax5" d="M80 206 L440 206 M80 206 L80 62"/>
+      <text class="tk2" x="52" y="210">0</text><text class="tk2" x="46" y="70">DAMAGE</text>
+      <circle class="dmg" cx="150" cy="120" r="6"/><circle class="dmg" cx="214" cy="160" r="6"/><circle class="dmg" cx="266" cy="96" r="6"/><circle class="dmg" cx="312" cy="164" r="6"/><circle class="dmg" cx="358" cy="132" r="6"/><circle class="dmg" cx="392" cy="168" r="6"/><circle class="dmg" cx="424" cy="140" r="6"/>
+      <text class="tk2" x="130" y="228">COLD</text><text class="tk2" x="404" y="228">WARM</text>
+      <text class="nt2" x="40" y="264">Seven points, scattered. No visible</text>
+      <text class="nt2" x="40" y="286">relationship with temperature.</text>
+      <text class="nt2" x="40" y="316" fill="#5d6863">The launch was approved.</text>
+
+      <rect class="fr5" x="510" y="20" width="450" height="220"/>
+      <text class="hd2" x="530" y="46" fill="#cf6046">RESTORED &middot; EVERY FLIGHT INCLUDED</text>
+      <path class="ax5" d="M570 206 L930 206 M570 206 L570 62"/>
+      <text class="tk2" x="542" y="210">0</text><text class="tk2" x="536" y="70">DAMAGE</text>
+      <circle class="dmg" cx="640" cy="120" r="6"/><circle class="dmg" cx="704" cy="160" r="6"/><circle class="dmg" cx="756" cy="96" r="6"/><circle class="dmg" cx="802" cy="164" r="6"/><circle class="dmg" cx="848" cy="132" r="6"/><circle class="dmg" cx="882" cy="168" r="6"/><circle class="dmg" cx="914" cy="140" r="6"/>
+      <circle class="none" cx="790" cy="206" r="6"/><circle class="none" cx="812" cy="206" r="6"/><circle class="none" cx="834" cy="206" r="6"/><circle class="none" cx="856" cy="206" r="6"/><circle class="none" cx="878" cy="206" r="6"/><circle class="none" cx="900" cy="206" r="6"/><circle class="none" cx="922" cy="206" r="6"/><circle class="none" cx="768" cy="206" r="6"/>
+      <path d="M570 186 L760 186" stroke="#cf6046" stroke-width="3" stroke-dasharray="9 6" fill="none"/>
+      <text class="tk2" x="620" y="228">COLD</text><text class="tk2" x="894" y="228">WARM</text>
+      <text class="nt2" x="530" y="264" fill="#cf6046">The zero-damage flights were all warm.</text>
+      <text class="nt2" x="530" y="286" fill="#cf6046">Every cold launch is above the line.</text>
+      <text class="nt2" x="530" y="316" fill="#cf6046">Nothing cold had ever flown clean.</text>
+    </svg>
+    <figcaption>The engineers arguing against the launch had the data. The charts they carried into the meeting plotted only the flights where damage had occurred, which removed exactly the evidence that mattered &mdash; the clean flights, all of them warm. The relationship was in the data and absent from the picture. Challenger launched the following morning at 36&deg;F. An O-ring failed, and the vehicle broke apart 73 seconds into flight, killing all seven crew. The Rogers Commission that investigated the accident found the cold-temperature relationship in the data afterwards. Edward Tufte later wrote about the presentation itself at length, and it remains the strongest argument that visualisation is a discipline with a duty of care rather than a finishing flourish.</figcaption>
+  </figure>
+
+  <div class="warning"><strong>The omission is the hardest failure to catch,</strong> because there is nothing on the page to look at. A truncated axis leaves a visible tick mark. A missing row leaves nothing at all. The only defence is asking, every time: what was filtered out before this was plotted, and would including it change the shape?</div>
+
+  <div class="quote">Neither the summary nor the chart is authoritative on its own. Compute it, plot it, then check that the two agree &mdash; and when they disagree, that disagreement is the most informative thing in front of you.<small>Closing position for stage five</small></div>
+
+  <p style="margin-top:44px">That is not an argument for distrusting everything. It is an argument for staying alive to what you are looking at, and for viewing anything important from more than one angle before you put it up. A disagreement between the number and the picture is not an inconvenience to be smoothed over. It is a signal, and it usually points back upstream to a decision about grain.</p>
+
+</div></section>
+
+<section id="canvas"><div class="shell">
+  <div class="section-head"><div class="section-no">09 / CANVAS</div><div><h2>Questions to ask at the start of anything</h2><p class="lead">Run these before you write a line. They locate you on the route, which tells you what the problem is actually made of.</p></div></div>
+
+  <div class="grid">
+    <div class="span-7 canvas">
+      <ol>
+        <li><strong>Which stage am I standing in?</strong> Collection, storage, shaping, analysis or visualisation. Nearly every stuck moment is caused by treating one as another.</li>
+        <li><strong>What grain did I receive, and what grain does my question need?</strong> If the question needs finer than the data, stop. That answer does not exist.</li>
+        <li><strong>Was anything already aggregated before it reached me?</strong> If so, note what was lost and whether it can be re-extracted from further upstream.</li>
+        <li><strong>Does this fit in memory?</strong> If not, the shaping belongs in SQL, not pandas.</li>
+        <li><strong>What shape is this, right now?</strong> Say the tuple out loud. Most array errors are answered by that sentence alone.</li>
+        <li><strong>Am I writing a loop over something uniform and numeric?</strong> If yes, there is almost certainly a vectorised line that replaces it.</li>
+        <li><strong>Have I actually plotted it?</strong> Before trusting any mean, correlation or trend line.</li>
+      </ol>
+    </div>
+    <article class="card span-5"><span class="label">Carry these four</span><h3>The load-bearing ideas</h3>
+      <p><strong>Aggregation is a one-way street.</strong> Fine to coarse, always. Coarse to fine, never.</p>
+      <p><strong>Shape is just a tuple of sizes,</strong> outermost first. Boxes within boxes, with the sizes written down.</p>
+      <p><strong>An array is a list that gave up flexibility to buy speed.</strong> One type, no ragged edges, one unbroken block.</p>
+      <p><strong>SQL and pandas are the same thought in two places.</strong> Learning one teaches you most of the other.</p>
+    </article>
+  </div>
+
+  <div class="quote">Every stage is a different job. Knowing which one you are standing in tells you which tool the problem is asking for.<small>Closing principle</small></div>
+</div></section>
+
+</main>
+
+<footer><div class="shell">
+  <div class="footer-grid">
+    <a class="tidy" href="https://github.com/TidyWeb/data_pipline_guide" target="_blank" rel="noopener"><img src="assets/tidyweb_logo.png" alt="TidyWeb logo" width="84" height="84"><span>TidyWeb</span></a>
+    <div>
+      <p style="margin:0"><strong>The Data Pipeline &mdash; a field guide.</strong> Collection, storage, shaping, analysis, visualisation.</p>
+      <p style="margin:8px 0 0;font-size:.92rem">An independent study aid. Several diagrams are schematic &mdash; drawn to show structure rather than plot exact source data. The Anscombe panels, the Berkeley department figures and the Challenger scatter in particular should not be quoted as the underlying datasets.</p>
+    </div>
+  </div>
+</div></footer>
+
+</body>
+</html>
