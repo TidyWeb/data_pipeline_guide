@@ -913,44 +913,50 @@
   </div>
 
   <figure class="figure">
-    <span class="mini-label">Figure 13 &middot; The omission &mdash; Challenger, the night before</span>
-    <svg viewBox="0 0 1000 330" role="img" aria-labelledby="ch-t ch-d">
-      <title id="ch-t">Challenger O-ring damage against launch temperature</title>
-      <desc id="ch-d">On the left, only flights that suffered damage are plotted, and no pattern is visible. On the right the flights with no damage are restored, all of them at warm temperatures, and the relationship between cold and failure becomes obvious.</desc>
+    <span class="mini-label">Figure 13 &middot; The same flights, charted two ways</span>
+    <svg viewBox="0 0 1000 300" role="img" aria-labelledby="ch-t ch-d">
+      <title id="ch-t">O-ring damage against launch temperature, with and without the undamaged flights</title>
+      <desc id="ch-d">The left chart plots only flights that suffered O-ring damage, and shows no pattern. The right chart adds every flight that flew without damage. All of those were warm launches, and once they are on the page it is clear that damage happens at the cold end and almost never at the warm end.</desc>
       <style>
         .fr5{fill:#fffdf7;stroke:#cfc9bb;stroke-width:1.5}
         .ax5{stroke:#5d6863;stroke-width:2}
         .dmg{fill:#174f3f}
-        .none{fill:#cf6046}
-        .hd2{font:700 12px ui-monospace,monospace;letter-spacing:.07em}
-        .nt2{font:14px Georgia,serif;fill:#5d6863}
-        .tk2{font:11px ui-monospace,monospace;fill:#5d6863}
+        .clean{fill:#cf6046}
+        .hd2{font:700 13px ui-monospace,monospace;letter-spacing:.07em}
+        .tk2{font:11px ui-monospace,monospace;fill:#5d6863;letter-spacing:.06em}
+        .zone{fill:#f6e2d9}
       </style>
 
-      <rect class="fr5" x="20" y="20" width="450" height="220"/>
-      <text class="hd2" x="40" y="46" fill="#174f3f">AS PRESENTED &middot; DAMAGED FLIGHTS ONLY</text>
-      <path class="ax5" d="M80 206 L440 206 M80 206 L80 62"/>
-      <text class="tk2" x="52" y="210">0</text><text class="tk2" x="46" y="70">DAMAGE</text>
-      <circle class="dmg" cx="150" cy="120" r="6"/><circle class="dmg" cx="214" cy="160" r="6"/><circle class="dmg" cx="266" cy="96" r="6"/><circle class="dmg" cx="312" cy="164" r="6"/><circle class="dmg" cx="358" cy="132" r="6"/><circle class="dmg" cx="392" cy="168" r="6"/><circle class="dmg" cx="424" cy="140" r="6"/>
-      <text class="tk2" x="130" y="228">COLD</text><text class="tk2" x="404" y="228">WARM</text>
-      <text class="nt2" x="40" y="264">Seven points, scattered. No visible</text>
-      <text class="nt2" x="40" y="286">relationship with temperature.</text>
-      <text class="nt2" x="40" y="316" fill="#5d6863">The launch was approved.</text>
+      <rect class="fr5" x="20" y="46" width="450" height="220"/>
+      <text class="hd2" x="20" y="30" fill="#174f3f">AS PRESENTED ON THE NIGHT</text>
+      <path class="ax5" d="M86 230 L448 230 M86 230 L86 66"/>
+      <text class="tk2" x="42" y="234">NONE</text><text class="tk2" x="34" y="76">DAMAGE</text>
+      <circle class="dmg" cx="156" cy="140" r="6"/><circle class="dmg" cx="220" cy="182" r="6"/><circle class="dmg" cx="272" cy="112" r="6"/><circle class="dmg" cx="318" cy="188" r="6"/><circle class="dmg" cx="364" cy="152" r="6"/><circle class="dmg" cx="398" cy="192" r="6"/><circle class="dmg" cx="430" cy="160" r="6"/>
+      <text class="tk2" x="130" y="252">COLD</text><text class="tk2" x="404" y="252">WARM</text>
+      <text class="tk2" x="230" y="252">LAUNCH TEMPERATURE</text>
 
-      <rect class="fr5" x="510" y="20" width="450" height="220"/>
-      <text class="hd2" x="530" y="46" fill="#cf6046">RESTORED &middot; EVERY FLIGHT INCLUDED</text>
-      <path class="ax5" d="M570 206 L930 206 M570 206 L570 62"/>
-      <text class="tk2" x="542" y="210">0</text><text class="tk2" x="536" y="70">DAMAGE</text>
-      <circle class="dmg" cx="640" cy="120" r="6"/><circle class="dmg" cx="704" cy="160" r="6"/><circle class="dmg" cx="756" cy="96" r="6"/><circle class="dmg" cx="802" cy="164" r="6"/><circle class="dmg" cx="848" cy="132" r="6"/><circle class="dmg" cx="882" cy="168" r="6"/><circle class="dmg" cx="914" cy="140" r="6"/>
-      <circle class="none" cx="790" cy="206" r="6"/><circle class="none" cx="812" cy="206" r="6"/><circle class="none" cx="834" cy="206" r="6"/><circle class="none" cx="856" cy="206" r="6"/><circle class="none" cx="878" cy="206" r="6"/><circle class="none" cx="900" cy="206" r="6"/><circle class="none" cx="922" cy="206" r="6"/><circle class="none" cx="768" cy="206" r="6"/>
-      <path d="M570 186 L760 186" stroke="#cf6046" stroke-width="3" stroke-dasharray="9 6" fill="none"/>
-      <text class="tk2" x="620" y="228">COLD</text><text class="tk2" x="894" y="228">WARM</text>
-      <text class="nt2" x="530" y="264" fill="#cf6046">The zero-damage flights were all warm.</text>
-      <text class="nt2" x="530" y="286" fill="#cf6046">Every cold launch is above the line.</text>
-      <text class="nt2" x="530" y="316" fill="#cf6046">Nothing cold had ever flown clean.</text>
+      <rect class="fr5" x="530" y="46" width="450" height="220"/>
+      <rect class="zone" x="738" y="47" width="241" height="218"/>
+      <text class="hd2" x="530" y="30" fill="#cf6046">AS IT SHOULD HAVE BEEN PRESENTED</text>
+      <path class="ax5" d="M596 230 L958 230 M596 230 L596 66"/>
+      <text class="tk2" x="552" y="234">NONE</text><text class="tk2" x="544" y="76">DAMAGE</text>
+      <circle class="dmg" cx="666" cy="140" r="6"/><circle class="dmg" cx="730" cy="182" r="6"/><circle class="dmg" cx="782" cy="112" r="6"/><circle class="dmg" cx="828" cy="188" r="6"/><circle class="dmg" cx="874" cy="152" r="6"/><circle class="dmg" cx="908" cy="192" r="6"/><circle class="dmg" cx="940" cy="160" r="6"/>
+      <circle class="clean" cx="770" cy="230" r="6"/><circle class="clean" cx="794" cy="230" r="6"/><circle class="clean" cx="818" cy="230" r="6"/><circle class="clean" cx="842" cy="230" r="6"/><circle class="clean" cx="866" cy="230" r="6"/><circle class="clean" cx="890" cy="230" r="6"/><circle class="clean" cx="914" cy="230" r="6"/><circle class="clean" cx="938" cy="230" r="6"/>
+      <text class="tk2" x="640" y="252">COLD</text><text class="tk2" x="914" y="252">WARM</text>
+      <text class="tk2" x="740" y="252">LAUNCH TEMPERATURE</text>
+      <text class="tk2" x="744" y="290" fill="#cf6046">EVERY FLIGHT IN THIS WARM BAND CAME BACK CLEAN</text>
+
+      <circle class="dmg" cx="26" cy="288" r="6"/><text class="tk2" x="42" y="292">FLIGHT WITH O-RING DAMAGE</text>
+      <circle class="clean" cx="330" cy="288" r="6"/><text class="tk2" x="346" y="292">FLIGHT WITH NO DAMAGE AT ALL</text>
     </svg>
-    <figcaption>The engineers arguing against the launch had the data. The charts they carried into the meeting plotted only the flights where damage had occurred, which removed exactly the evidence that mattered &mdash; the clean flights, all of them warm. The relationship was in the data and absent from the picture. Challenger launched the following morning at 36&deg;F. An O-ring failed, and the vehicle broke apart 73 seconds into flight, killing all seven crew. The Rogers Commission that investigated the accident found the cold-temperature relationship in the data afterwards. Edward Tufte later wrote about the presentation itself at length, and it remains the strongest argument that visualisation is a discipline with a duty of care rather than a finishing flourish.</figcaption>
   </figure>
+
+  <div class="grid" style="margin-top:-12px">
+    <article class="card span-6"><span class="label">The chart they took into the meeting</span><h3>Seven points, and no argument</h3><p>Only the flights that had suffered damage were plotted. Those seven points sit scattered about with no visible relationship to temperature, so the chart appears to say that cold has nothing to do with it. The launch was approved.</p></article>
+    <article class="card span-6"><span class="label">The chart they could have taken</span><h3>Add every flight, and the pattern arrives</h3><p>The flights that came back with no damage were left off the first chart entirely, and every one of them was a warm launch. Put them back and the point becomes obvious: warm launches almost never suffered damage, and cold launches almost always did. No cold launch had ever come back clean.</p></article>
+  </div>
+
+  <p style="margin-top:26px">Challenger launched the next morning at 36&deg;F, colder than anything on either chart. An O-ring failed, and the vehicle broke apart 73 seconds into flight, killing all seven crew. The Rogers Commission found the temperature relationship in the data afterwards &mdash; it had been there the whole time, sitting in the rows nobody plotted. Edward Tufte later wrote about the presentation itself at length, and it remains the strongest argument that visualisation is a discipline with a duty of care rather than a finishing flourish.</p>
 
   <div class="warning"><strong>The omission is the hardest failure to catch,</strong> because there is nothing on the page to look at. A truncated axis leaves a visible tick mark. A missing row leaves nothing at all. The only defence is asking, every time: what was filtered out before this was plotted, and would including it change the shape?</div>
 
