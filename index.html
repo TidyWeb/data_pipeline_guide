@@ -740,60 +740,111 @@
   <div class="quote">Pooling hid the fact that the two treatments were not given the same mix of patients. The combined figure ends up reporting the difficulty of the caseload instead of the quality of the treatment.<small>What went wrong, in one sentence</small></div>
 
   <h3 style="margin-top:52px">The same thing, at scale: Berkeley, 1973</h3>
-  <p>Graduate admissions figures for the University of California, Berkeley appeared to show men being admitted at a notably higher rate than women. Broken down by department, the picture changed.</p>
+  <p>Graduate admissions figures for the University of California, Berkeley appeared to show men being admitted at a notably higher rate than women. The two charts below show the same admissions, counted two ways. The first pools every department together. The second keeps them apart.</p>
+  <p>The six departments shown are the largest six, which is the set this case is normally examined through. Note carefully what each chart measures: the pooled chart shows <strong>rates</strong>, and the department chart shows <strong>how many people applied</strong>, with the admitted portion filled in solid. That second measurement is the one the pooled figure throws away, and it is the one that explains everything.</p>
 
   <figure class="figure">
-    <span class="mini-label">Figure 10 &middot; The pooled rate said one thing; the departments said another</span>
-    <svg viewBox="0 0 1000 340" role="img" aria-labelledby="bk-t bk-d">
-      <title id="bk-t">Berkeley admissions, pooled versus by department</title>
-      <desc id="bk-d">Pooled, men were admitted at 44 per cent and women at 35. Department by department the rates were close or slightly favoured women, but women applied overwhelmingly to the departments with the lowest admission rates.</desc>
+    <span class="mini-label">Figure 10 &middot; The pooled figure &mdash; every department thrown into one pile</span>
+    <svg viewBox="0 0 1000 250" role="img" aria-labelledby="bkp-t bkp-d">
+      <title id="bkp-t">Pooled Berkeley admission rates by sex</title>
+      <desc id="bkp-d">Pooled across all departments, men were admitted at about 44 per cent and women at about 35 per cent, a gap of nine points.</desc>
       <style>
-        .m{fill:#174f3f}
-        .w{fill:#cf6046}
-        .bax{stroke:#5d6863;stroke-width:2}
-        .bg2{stroke:#e2dccf;stroke-width:1}
-        .bh{font:700 13px ui-monospace,monospace;fill:#cf6046;letter-spacing:.07em}
-        .bp{font:700 15px Georgia,serif;fill:#17201d}
-        .bs{font:12px ui-monospace,monospace;fill:#5d6863}
-        .bn{font:14px Georgia,serif;fill:#5d6863}
+        .pm{fill:#174f3f}
+        .pw{fill:#cf6046}
+        .pax{stroke:#5d6863;stroke-width:2}
+        .pg{stroke:#e2dccf;stroke-width:1}
+        .ppct{font:700 21px Georgia,serif;fill:#17201d}
+        .plab{font:700 12px ui-monospace,monospace;fill:#5d6863;letter-spacing:.07em}
+        .pn{font:15px Georgia,serif;fill:#5d6863}
+      </style>
+      <path class="pg" d="M150 190 L420 190 M150 130 L420 130 M150 70 L420 70"/>
+      <text class="plab" x="104" y="194">0%</text><text class="plab" x="98" y="134">25%</text><text class="plab" x="98" y="74">50%</text>
+      <path class="pax" d="M150 250 L420 250 M150 250 L150 60"/>
+      <rect class="pm" x="190" y="144" width="72" height="106"/>
+      <text class="ppct" x="196" y="134">44%</text><text class="plab" x="204" y="272">MEN</text>
+      <rect class="pw" x="308" y="166" width="72" height="84"/>
+      <text class="ppct" x="314" y="156">35%</text><text class="plab" x="312" y="272">WOMEN</text>
+      <text class="pn" x="480" y="112">A nine point gap, across all departments</text>
+      <text class="pn" x="480" y="140">taken together. This is the figure that</text>
+      <text class="pn" x="480" y="168">caused the alarm &mdash; and it is correctly</text>
+      <text class="pn" x="480" y="196">calculated. Nobody made an arithmetic</text>
+      <text class="pn" x="480" y="224">mistake anywhere in it.</text>
+    </svg>
+    <figcaption>Now keep the departments separate instead, and look at what the pooling was hiding.</figcaption>
+  </figure>
+
+  <figure class="figure wide">
+    <span class="mini-label">Figure 11 &middot; Bar height is how many applied. Solid fill is how many were admitted.</span>
+    <svg viewBox="0 0 1010 520" role="img" aria-labelledby="bk2-t bk2-d">
+      <title id="bk2-t">Berkeley 1973 admissions by department, showing applicant volume and admission outcome</title>
+      <desc id="bk2-d">Six departments ordered from easiest to hardest to enter. Bar height shows the number of applicants; the solid lower portion shows how many were admitted. Men applied overwhelmingly to the two easy departments; women applied overwhelmingly to the hard ones.</desc>
+      <style>
+        .mAll{fill:#cfe0d8;stroke:#174f3f;stroke-width:1.5}
+        .mIn{fill:#174f3f}
+        .wAll{fill:#f3d6cd;stroke:#cf6046;stroke-width:1.5}
+        .wIn{fill:#cf6046}
+        .gl{stroke:#e2dccf;stroke-width:1}
+        .axl{stroke:#5d6863;stroke-width:2}
+        .yt{font:11px ui-monospace,monospace;fill:#5d6863}
+        .dept{font:700 22px Georgia,serif;fill:#17201d}
+        .lm{font:11px ui-monospace,monospace;fill:#174f3f}
+        .lw{font:11px ui-monospace,monospace;fill:#cf6046}
+        .keyt{font:700 11px ui-monospace,monospace;fill:#5d6863;letter-spacing:.06em}
+        .scale{font:700 11px ui-monospace,monospace;fill:#5d6863;letter-spacing:.08em}
       </style>
 
-      <text class="bh" x="20" y="30">POOLED · ALL DEPARTMENTS TOGETHER</text>
-      <path class="bax" d="M20 200 L300 200"/>
-      <rect class="m" x="50" y="90" width="70" height="110"/><text class="bp" x="56" y="80">44%</text><text class="bs" x="56" y="220">MEN</text>
-      <rect class="w" x="150" y="112" width="70" height="88"/><text class="bp" x="156" y="102">35%</text><text class="bs" x="150" y="220">WOMEN</text>
-      <text class="bn" x="20" y="256">A nine point gap. This is the figure</text>
-      <text class="bn" x="20" y="278">that caused the alarm.</text>
+      <path class="gl" d="M64 116 L980 116 M64 162 L980 162 M64 208 L980 208 M64 254 L980 254"/>
+      <path class="axl" d="M64 300 L980 300 M64 300 L64 100"/>
+      <text class="yt" x="20" y="304">0</text><text class="yt" x="20" y="258">200</text><text class="yt" x="20" y="212">400</text><text class="yt" x="20" y="166">600</text><text class="yt" x="20" y="120">800</text>
+      <text class="keyt" x="12" y="88">APPLICANTS</text>
 
-      <path d="M330 20 L330 320" stroke="#cfc9bb" stroke-width="2"/>
+      <rect class="mAll" x="82" y="110" width="42" height="190"/><rect class="mIn" x="82" y="182" width="42" height="118"/>
+      <rect class="wAll" x="132" y="275" width="42" height="25"/><rect class="wIn" x="132" y="280" width="42" height="20"/>
+      <text class="dept" x="82" y="336">A</text>
+      <text class="lm" x="82" y="360">MEN · 825 applied</text><text class="lm" x="82" y="376">512 admitted · 62%</text>
+      <text class="lw" x="82" y="400">WOMEN · 108 applied</text><text class="lw" x="82" y="416">89 admitted · 82%</text>
 
-      <text class="bh" x="366" y="30">BY DEPARTMENT · WITH APPLICANT NUMBERS</text>
-      <path class="bax" d="M366 200 L970 200"/>
+      <rect class="mAll" x="234" y="171" width="42" height="129"/><rect class="mIn" x="234" y="219" width="42" height="81"/>
+      <rect class="wAll" x="284" y="294" width="42" height="6"/><rect class="wIn" x="284" y="296" width="42" height="4"/>
+      <text class="dept" x="234" y="336">B</text>
+      <text class="lm" x="234" y="360">MEN · 560 applied</text><text class="lm" x="234" y="376">353 admitted · 63%</text>
+      <text class="lw" x="234" y="400">WOMEN · 25 applied</text><text class="lw" x="234" y="416">17 admitted · 68%</text>
 
-      <rect class="m" x="380" y="52" width="26" height="148"/><rect class="w" x="410" y="46" width="26" height="154"/>
-      <text class="bs" x="380" y="220">DEPT A</text><text class="bs" x="380" y="238">825 m</text><text class="bs" x="380" y="254">108 w</text>
+      <rect class="mAll" x="386" y="225" width="42" height="75"/><rect class="mIn" x="386" y="272" width="42" height="28"/>
+      <rect class="wAll" x="436" y="164" width="42" height="136"/><rect class="wIn" x="436" y="254" width="42" height="46"/>
+      <text class="dept" x="386" y="336">C</text>
+      <text class="lm" x="386" y="360">MEN · 325 applied</text><text class="lm" x="386" y="376">120 admitted · 37%</text>
+      <text class="lw" x="386" y="400">WOMEN · 593 applied</text><text class="lw" x="386" y="416">202 admitted · 34%</text>
 
-      <rect class="m" x="470" y="60" width="26" height="140"/><rect class="w" x="500" y="56" width="26" height="144"/>
-      <text class="bs" x="470" y="220">DEPT B</text><text class="bs" x="470" y="238">560 m</text><text class="bs" x="470" y="254">25 w</text>
+      <rect class="mAll" x="538" y="204" width="42" height="96"/><rect class="mIn" x="538" y="268" width="42" height="32"/>
+      <rect class="wAll" x="588" y="214" width="42" height="86"/><rect class="wIn" x="588" y="270" width="42" height="30"/>
+      <text class="dept" x="538" y="336">D</text>
+      <text class="lm" x="538" y="360">MEN · 417 applied</text><text class="lm" x="538" y="376">138 admitted · 33%</text>
+      <text class="lw" x="538" y="400">WOMEN · 375 applied</text><text class="lw" x="538" y="416">131 admitted · 35%</text>
 
-      <rect class="m" x="560" y="124" width="26" height="76"/><rect class="w" x="590" y="118" width="26" height="82"/>
-      <text class="bs" x="560" y="220">DEPT C</text><text class="bs" x="560" y="238">325 m</text><text class="bs" x="560" y="254">593 w</text>
+      <rect class="mAll" x="690" y="256" width="42" height="44"/><rect class="mIn" x="690" y="288" width="42" height="12"/>
+      <rect class="wAll" x="740" y="210" width="42" height="90"/><rect class="wIn" x="740" y="278" width="42" height="22"/>
+      <text class="dept" x="690" y="336">E</text>
+      <text class="lm" x="690" y="360">MEN · 191 applied</text><text class="lm" x="690" y="376">53 admitted · 28%</text>
+      <text class="lw" x="690" y="400">WOMEN · 393 applied</text><text class="lw" x="690" y="416">94 admitted · 24%</text>
 
-      <rect class="m" x="650" y="130" width="26" height="70"/><rect class="w" x="680" y="128" width="26" height="72"/>
-      <text class="bs" x="650" y="220">DEPT D</text><text class="bs" x="650" y="238">417 m</text><text class="bs" x="650" y="254">375 w</text>
+      <rect class="mAll" x="842" y="214" width="42" height="86"/><rect class="mIn" x="842" y="295" width="42" height="5"/>
+      <rect class="wAll" x="892" y="222" width="42" height="78"/><rect class="wIn" x="892" y="294" width="42" height="6"/>
+      <text class="dept" x="842" y="336">F</text>
+      <text class="lm" x="842" y="360">MEN · 373 applied</text><text class="lm" x="842" y="376">22 admitted · 6%</text>
+      <text class="lw" x="842" y="400">WOMEN · 341 applied</text><text class="lw" x="842" y="416">24 admitted · 7%</text>
 
-      <rect class="m" x="740" y="152" width="26" height="48"/><rect class="w" x="770" y="148" width="26" height="52"/>
-      <text class="bs" x="740" y="220">DEPT E</text><text class="bs" x="740" y="238">191 m</text><text class="bs" x="740" y="254">393 w</text>
+      <path d="M82 446 L934 446" stroke="#a9a294" stroke-width="10"/>
+      <text class="scale" x="82" y="472">EASIEST TO GET INTO</text>
+      <text class="scale" x="806" y="472">HARDEST TO GET INTO</text>
 
-      <rect class="m" x="830" y="186" width="26" height="14"/><rect class="w" x="860" y="186" width="26" height="14"/>
-      <text class="bs" x="830" y="220">DEPT F</text><text class="bs" x="830" y="238">373 m</text><text class="bs" x="830" y="254">341 w</text>
-
-      <path d="M366 288 L560 288" stroke="#174f3f" stroke-width="3"/>
-      <text class="bn" x="366" y="312" fill="#174f3f">Easy to get into. Mostly men applied.</text>
-      <path d="M700 288 L968 288" stroke="#cf6046" stroke-width="3"/>
-      <text class="bn" x="700" y="312" fill="#cf6046">Hard to get into. Mostly women applied.</text>
+      <rect class="mAll" x="82" y="496" width="20" height="16"/><rect class="mIn" x="82" y="504" width="20" height="8"/>
+      <text class="keyt" x="110" y="509">MEN · SOLID PART = ADMITTED</text>
+      <rect class="wAll" x="392" y="496" width="20" height="16"/><rect class="wIn" x="392" y="504" width="20" height="8"/>
+      <text class="keyt" x="420" y="509">WOMEN · SOLID PART = ADMITTED</text>
+      <text class="keyt" x="734" y="509">PALE PART = REJECTED</text>
     </svg>
-    <figcaption>Departments A and B admitted most applicants and received overwhelmingly male applications. Departments C, E and F rejected most applicants and received far more female ones. Within almost every department the rates were close, and several slightly favoured women. The nine point pooled gap was reporting which departments people applied to. Later scholarship has complicated the tidy version of this story, so read it rather than repeat it.</figcaption>
+    <figcaption>Read the bar heights first, ignoring the fill. In departments A and B &mdash; the two easiest to enter &mdash; the green bars tower over the coral ones: men applied there in huge numbers, women barely at all. In C and E the position reverses, and those are departments where most applicants were turned away. Now read the fill: it shrinks steadily from left to right, because the departments are ordered easiest to hardest. Women applied in bulk to the departments where the fill had almost disappeared. Within the departments themselves the rates are close, and in A, B and D women were admitted at the higher rate. The nine point pooled gap was reporting <em>where people applied</em>, not how they were treated once they got there.</figcaption>
   </figure>
 
   <div class="warning"><strong>The practical test:</strong> before trusting any pooled figure, ask what groups sit inside it and whether those groups appear in different proportions. If they do, calculate the same thing inside each group. If the two answers disagree, the disagreement is the finding.</div>
@@ -802,7 +853,7 @@
   <p class="lead">Every plot involves decisions that are invisible in the finished image: where the axis starts, which rows were included, what the date window is, whether a quantity is encoded as length or as area. Some of those decisions manufacture a story that is not in the data &mdash; sometimes deliberately, and often not.</p>
 
   <figure class="figure">
-    <span class="mini-label">Figure 11 &middot; The truncated axis &mdash; identical numbers, two stories</span>
+    <span class="mini-label">Figure 12 &middot; The truncated axis &mdash; identical numbers, two stories</span>
     <svg viewBox="0 0 1000 320" role="img" aria-labelledby="tr-t tr-d">
       <title id="tr-t">Truncated axis comparison</title>
       <desc id="tr-d">The same five values plotted twice. On an axis starting at zero the bars are nearly equal. On an axis starting just below the lowest value the same bars appear to climb steeply.</desc>
@@ -862,7 +913,7 @@
   </div>
 
   <figure class="figure">
-    <span class="mini-label">Figure 12 &middot; The omission &mdash; Challenger, the night before</span>
+    <span class="mini-label">Figure 13 &middot; The omission &mdash; Challenger, the night before</span>
     <svg viewBox="0 0 1000 330" role="img" aria-labelledby="ch-t ch-d">
       <title id="ch-t">Challenger O-ring damage against launch temperature</title>
       <desc id="ch-d">On the left, only flights that suffered damage are plotted, and no pattern is visible. On the right the flights with no damage are restored, all of them at warm temperatures, and the relationship between cold and failure becomes obvious.</desc>
@@ -942,7 +993,7 @@
     <a class="tidy" href="https://github.com/TidyWeb/data_pipeline_guide" target="_blank" rel="noopener"><img src="assets/tidyweb_logo.png" alt="TidyWeb logo" width="84" height="84"><span>TidyWeb</span></a>
     <div>
       <p style="margin:0"><strong>The Data Pipeline &mdash; a field guide.</strong> Collection, storage, shaping, analysis, visualisation.</p>
-      <p style="margin:8px 0 0;font-size:.92rem">An independent study aid. Several diagrams are schematic &mdash; drawn to show structure rather than plot exact source data. The Anscombe panels, the Berkeley department figures and the Challenger scatter in particular should not be quoted as the underlying datasets.</p>
+      <p style="margin:8px 0 0;font-size:.92rem">An independent study aid. Several diagrams are schematic &mdash; drawn to show structure rather than plot exact source data. The Anscombe panels and the Challenger scatter in particular should not be quoted as the underlying datasets. The Berkeley and kidney stone figures use the published numbers.</p>
     </div>
   </div>
 </div></footer>

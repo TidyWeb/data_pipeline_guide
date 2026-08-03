@@ -28,9 +28,9 @@ No build step, no dependencies. Open `index.html` in any browser.
 ## A note on the diagrams
 
 Several figures are schematic — drawn to show the structure of an argument
-rather than to plot the exact source data. The Anscombe panels, the Berkeley
-department figures and the Challenger scatter should not be quoted as the
-underlying datasets.
+rather than to plot the exact source data. The Anscombe panels and the Challenger
+scatter should not be quoted as the underlying datasets. The Berkeley and
+kidney stone figures use the published numbers.
 
 ---
 
