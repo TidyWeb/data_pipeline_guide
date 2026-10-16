@@ -1,5 +1,8 @@
 # The Data Pipeline — A Field Guide
 
+## [🌐 Open the live site: https://tidyweb.github.io/data_pipeline_guide/ ↗](https://tidyweb.github.io/data_pipeline_guide/)
+
+
 An illustrated guide to the data pipeline for people learning Python for data
 analysis: how a fact about the world becomes a row, how a row becomes a shape,
 and how a shape becomes a picture.
