@@ -1,6 +1,6 @@
 # The Data Pipeline — A Field Guide
 
-## [🌐 Open the live site: https://tidyweb.github.io/data_pipeline_guide/ ↗](https://tidyweb.github.io/data_pipeline_guide/)
+### [Visit the live site ↗](https://tidyweb.github.io/data_pipeline_guide/)
 
 
 An illustrated guide to the data pipeline for people learning Python for data
